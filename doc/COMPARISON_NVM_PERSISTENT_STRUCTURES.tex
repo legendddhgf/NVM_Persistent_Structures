@@ -1,0 +1,85 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{lipsum}                     % Dummytext
+\usepackage{hyperref}
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+\usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{float}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\newcommand*{\QEDA}{\hfill\ensuremath{\blacksquare}}% filled box
+\newcommand*{\QEDB}{\hfill\ensuremath{\square}}% unfilled box
+
+% dem nice tables
+\usepackage[hmargin=2cm,top=4cm,headheight=65pt,footskip=65pt]{geometry}
+\usepackage{fmtcount} % for \ordinalnum
+\usepackage{array,multirow}
+\usepackage{tabularx}
+\usepackage{lastpage}
+
+
+% add a special collumn type
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+
+
+%header/footer stuff
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+%note that if you do not do these blank ones, the package defaults to something
+%you may not want in your header or footer
+\lhead{CMPE 293}
+\chead{}
+\rhead{\today}
+\lfoot{Isaak Cherdak}
+\cfoot{}
+\rfoot{\thepage}
+
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+\usepackage[english]{babel}
+\emergencystretch=1pt
+\usepackage[justification=centering]{caption}
+\graphicspath{{Pictures/} }
+
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\newcommandx{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+\newcommandx{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+\newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+\newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
+
+\usepackage{setspace}
+\doublespacing
+
+\title{A Comparison of Persistent Data Structures for Non-Volatile Memory
+Applications}
+\author{Isaak Cherdak}
+%\date{} %blank date
+
+\begin{document}
+
+\maketitle
+
+\pagebreak
+
+\todo[inline]{setup bibtek crap}
+
+\section*{Abstract}
+
+This is a paper which should be read because...
+
+\section{Introduction}
+
+\end{document}
