@@ -2,7 +2,7 @@
 EXE = NPSB
 MAIN = Bench
 MAINSRC = $(MAIN:%=%.c)
-MODULE = SinglyLinkedList
+MODULE = SinglyLinkedList Vector
 HEADER = $(MODULE:%=%.h)
 MODULESRC = $(MODULE:%=%.c)
 SRC = $(MAINSRC) $(MODULESRC)
