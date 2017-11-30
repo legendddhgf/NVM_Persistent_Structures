@@ -22,7 +22,7 @@ SLL *SLLInit(SLL *sll);
 
 void SLLInsert(SLL *sll, Generic data, int32_t index);
 
-Generic SLLGet(SLL *sll, int32_t index);
+Generic SLLGetElement(SLL *sll, int32_t index);
 
 uint32_t SLLGetSize(SLL *sll);
 

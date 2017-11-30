@@ -69,7 +69,7 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
 // index -1 is last item.
 //
 // program dies if item isn't found so return is undefined in this case
-Generic SLLGet(SLL *sll, int32_t index) {
+Generic SLLGetElement(SLL *sll, int32_t index) {
   if (sll == NULL) {
     fprintf(stderr, "Null SLL reference passed to SLLGet\n");
     exit(-1);
