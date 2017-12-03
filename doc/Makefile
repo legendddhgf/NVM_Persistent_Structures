@@ -1,4 +1,4 @@
-MAIN = COMPARISON_NVM_PERSISTENT_STRUCTURES
+MAIN = project
 TEXPDF = $(MAIN).pdf
 TEXSRC = $(MAIN).tex
 TEXOBJ = *.aux *.log *.toc *.out
