@@ -1,4 +1,6 @@
-#include "SinglyLinkedList.h"
+#include "SLL.h"
+#include "Vector.h"
+#include "BTree.h"
 
 int main(int argc, char **argv) {
   fprintf(stdout, "You're attempting to run %s with %d arguments, nice...\n",

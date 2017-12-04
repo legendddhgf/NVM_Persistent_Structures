@@ -1,12 +1,16 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "stdint.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define _MACROVALUE(MACRO) MACRO
 #define MACROVALUE(MACRO) _MACROVALUE(MACRO)
+
+#ifndef INTEGERBITWIDTH
+#define INTEGERBITWIDTH 32
+#endif
 
 // assumes 2's complement representation
 #define MAXINT ((1 << (INTEGERBITWIDTH - 1)) - 1)

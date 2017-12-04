@@ -1,4 +1,4 @@
-#include "SinglyLinkedList.h"
+#include "SLL.h"
 //TODO: create ExtraUtitlities library and use it for better debug statements
 
 #include <stdio.h>

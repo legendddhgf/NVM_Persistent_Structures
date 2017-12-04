@@ -1,5 +1,5 @@
-#ifndef SINGLYLINKEDLIST_H
-#define SINGLYLINKEDLIST_H
+#ifndef SLL_H
+#define SLL_H
 
 #include "Common.h"
 
