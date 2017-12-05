@@ -18,6 +18,9 @@
 #define MAXUINT ((1 << INTEGERBITWIDTH) - 1)
 #define MINUINT (0)
 
+#define TRUE 1
+#define FALSE 0
+
 typedef void * Generic;
 
 #endif
