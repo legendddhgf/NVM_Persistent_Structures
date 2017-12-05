@@ -10,4 +10,6 @@
 
 typedef struct BTreeNode *BTree;
 
+BTree *newBTree(BTree *bt);
+
 #endif
