@@ -1,8 +1,8 @@
 MAIN = project
 TEXPDF = $(MAIN).pdf
 TEXSRC = $(MAIN).tex
-TEXOBJ = *.aux *.log *.toc *.out
-COMPILETEX = pdflatex
+TEXOBJ = *.aux *.log *.toc *.out *.fdb_latexmk *.fls
+COMPILETEX = latexmk -pdf
 PDFREADER = evince
 
 DELETE = rm -f

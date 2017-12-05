@@ -1,4 +1,5 @@
 \documentclass{article}
+
 \usepackage[utf8]{inputenc}
 \usepackage{lipsum}                     % Dummytext
 \usepackage{hyperref}
@@ -7,6 +8,9 @@
 \usepackage{graphicx}
 \usepackage{verbatim}
 \usepackage{float}
+\usepackage{tikz-qtree}
+\usepackage{tikz}
+\usepackage[linguistics]{forest}
 
 \usepackage{amssymb}
 \usepackage{amsmath}
@@ -72,16 +76,37 @@ Applications}
 
 \maketitle
 
-\pagebreak
-
-\todo[inline]{setup bibtek crap}
-
 \section*{Abstract}
 
 This is a paper which should be read because...
 
+\pagebreak
+
+\tableofcontents
+
+\pagebreak
+
+\todo[inline]{setup bibtek crap}
+
 \section{Introduction}
 
+\section{Methodology}
+
+My focus was on ...
+
+\section{Implementation}
+
+\subsection{Overview}
+
+We focused on making things persistent (invalid state not possible). We also
+used clwb
+(\url{https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=clwb&expand=662}
+from intrinsics refernce).
+
+We multiplied results from cachegrind to reflect NVM timings accordingly...
+
+We further used pilot to aid in analysis of the results and structuring the
+benchmark.
 
 \section{Citation Info}
 
@@ -90,6 +115,6 @@ This is a paper which should be read because...
 sources to consider:
 
 B-Trees:\\
-https://dl.acm.org/citation.cfm?doid=356770.356776
+\url{https://dl.acm.org/citation.cfm?doid=356770.356776}
 
 \end{document}
