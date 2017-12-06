@@ -25,6 +25,7 @@ BTree *BTreeInit(BTree *bt) {
   return bt;
 }
 
+// returns whether n is a leaf
 uint32_t BTNodeIsLeaf(BTNode *n) {
   if (n == NULL) {
     fprintf(stderr, "Null BTNode reference passed to BTNodeIsLeaf\n");
@@ -34,6 +35,7 @@ uint32_t BTNodeIsLeaf(BTNode *n) {
   return n->children[0] == NULL ? TRUE : FALSE;
 }
 
+// returns whether n is full
 uint32_t BTNodeIsFull(BTNode *n) {
   if (n == NULL) {
     fprintf(stderr, "Null BTNode reference passed to BTNodeIsFull\n");
@@ -54,12 +56,32 @@ uint32_t BTNodeNextKeyLocation(BTNode *n, uint32_t key) {
     fprintf(stderr, "Non-Full BTNode passed to BTNodeNextKeyLocation\n");
     exit(-1);
   }
+  // remember that we assume this node is full
   for (int i = 0; i < BTREEKEYUPPERLIMIT; i++) {
     if (key < n->keys[i]) {
       return i; // child node 0 to BTREECHILDUPPERLIMIT - 2
     }
   }
   return BTREEKEYUPPERLIMIT; // the last child node (BTREECHILDUPPERLIMIT - 1)
+}
+
+// adds an entry to a non-full node
+void BTNodeAddEntry(BTNode *n, uint32_t key, Generic value) {
+  if (n == NULL) {
+    fprintf(stderr, "Null BTNode reference passed to BTNodeAddEntry\n");
+    exit(-1);
+  }
+  if (BTNodeIsFull(n)) {
+    fprintf(stderr, "Full BTNode passed to BTNodeAddEntry\n");
+    exit(-1);
+  }
+  int keyInsertLoc = 0;
+  while (keyInsertLoc < BTREEKEYUPPERLIMIT - 1) { // there is a spot for sure
+    if (n->values[keyInsertLoc] == NULL) break;
+    keyInsertLoc++;
+  }
+  n->keys[keyInsertLoc] = key;
+  n->values[keyInsertLoc] = value;
 }
 
 // Performs insertion of data into bt by creating a key by hashing data and
@@ -83,6 +105,10 @@ void BTreeInsert(BTree *bt, Generic data, int32_t index) {
   BTNode *iter = root;
   while (!BTNodeIsLeaf(iter) && BTNodeIsFull(iter)) { // find insertion node
     iter = iter->children[BTNodeNextKeyLocation(iter, key)]; // next child
+  }
+  if (!BTNodeIsFull(iter)) {
+    BTNodeAddEntry(iter, key, data);
+    return;
   }
   // TODO: if not full and goes at end, append K/V to node
   //
