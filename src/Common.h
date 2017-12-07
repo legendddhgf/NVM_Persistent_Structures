@@ -23,4 +23,6 @@
 
 typedef void * Generic;
 
+void GenericPrint(FILE* out, Generic data);
+
 #endif

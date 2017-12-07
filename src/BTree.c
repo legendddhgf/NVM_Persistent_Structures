@@ -65,8 +65,8 @@ uint32_t BTNodeNextKeyLocation(BTNode *n, uint32_t key) {
   return BTREEKEYUPPERLIMIT; // the last child node (BTREECHILDUPPERLIMIT - 1)
 }
 
-// adds an entry to a non-full node
-void BTNodeAddEntry(BTNode *n, uint32_t key, Generic value) {
+// returns location to add an entry to a non-full node
+uint32_t BTNodeAddLocation(BTNode *n, uint32_t key) {
   if (n == NULL) {
     fprintf(stderr, "Null BTNode reference passed to BTNodeAddEntry\n");
     exit(-1);
@@ -77,11 +77,33 @@ void BTNodeAddEntry(BTNode *n, uint32_t key, Generic value) {
   }
   int keyInsertLoc = 0;
   while (keyInsertLoc < BTREEKEYUPPERLIMIT - 1) { // there is a spot for sure
-    if (n->values[keyInsertLoc] == NULL) break;
+    if (n->values[keyInsertLoc] == NULL) break; // found next empty spot
+    if (key < n->keys[keyInsertLoc]) break; // our key goes before this one
     keyInsertLoc++;
   }
-  n->keys[keyInsertLoc] = key;
-  n->values[keyInsertLoc] = value;
+  return keyInsertLoc;
+}
+
+// it's ok to copy references because we will be replacing n anyway
+BTNode *BTNodeCopy(BTNode *n) {
+  BTNode *btn = newBTNode();
+  for (uint32_t i = 0; i < BTREECHILDUPPERLIMIT; i++) {
+    btn->children[i] = n->children[i];
+  }
+  for (uint32_t i = 0; i < BTREEKEYUPPERLIMIT; i++) {
+    btn->keys[i] = n->keys[i];
+    btn->values[i] = n->values[i];
+  }
+  return btn;
+}
+
+// TODO;
+// returns the highest node to split based off key and prespecified lowest split
+// targer node
+BTNode *BTNodeToSplit(BTNode *root, BTNode *split, uint32_t key) {
+  if (1) return split; // TODO:
+  BTNode *iter = BTNodeToSplit(root, split, key); // TODO: this was an idea that needs sleep
+  return iter; // TODO
 }
 
 // Performs insertion of data into bt by creating a key by hashing data and
@@ -103,16 +125,43 @@ void BTreeInsert(BTree *bt, Generic data, int32_t index) {
     return;
   }
   BTNode *iter = root;
+  BTNode *parent = NULL;
+  uint32_t childIndex = 0; // index of iter relative to parent
   while (!BTNodeIsLeaf(iter) && BTNodeIsFull(iter)) { // find insertion node
-    iter = iter->children[BTNodeNextKeyLocation(iter, key)]; // next child
+    parent = iter;
+    childIndex = BTNodeNextKeyLocation(iter, key);
+    iter = iter->children[childIndex]; // next child
   }
+  BTNode *newIter = NULL; // keeping track in case of later changing root
+  // just insert it into the node
   if (!BTNodeIsFull(iter)) {
-    BTNodeAddEntry(iter, key, data);
-    return;
+    uint32_t keyIndex = BTNodeAddLocation(iter, key); // get insert location
+    newIter = BTNodeCopy(iter);
+
+    // shift things right once from keyIndex to BTREEKEYUPPERLIMIT - 1
+    for (uint32_t i = BTREEKEYUPPERLIMIT - 2; i >= keyIndex; i--) {
+      newIter->keys[i + 1] = newIter->keys[i];
+      newIter->values[i + 1] = newIter->values[i];
+    }
+    newIter->keys[keyIndex] = key;
+    newIter->values[keyIndex] = data;
+    if (parent != NULL) { // if it's the root, handled later
+      parent->children[childIndex] = newIter; // a point of persistence
+    }
   }
-  // TODO: if not full and goes at end, append K/V to node
-  //
   // else, must split current node into this and BTREECHILDLOWERLIMIT children
   // then fill current node and children accordingly to maintain ordering
+  else { // TODO:
+    //BTNode *splitNode = BTNodeToSplit(root, iter, key);
+    newIter = BTNodeCopy(iter);
+  }
+  free(iter); // it was replaced
+  if (parent == NULL) { // this is the new root
+    *bt = newIter;
+  }
+  // point of persistence
 }
 
+void BTreePrint(FILE *out, BTree *bt) {
+  fprintf(out, "%s\n", bt == NULL ? "NULL" : "NAH"); // TODO
+}

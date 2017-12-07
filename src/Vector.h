@@ -14,15 +14,17 @@ typedef Generic * GenericArray;
 // the contiguous block of data constituting the vector
 typedef GenericArray * Vector;
 
-Vector *vectorInit(Vector *v);
+Vector *VectorInit(Vector *v);
 
-void vectorInsert(Vector *v, Generic data, int32_t index);
+void VectorInsert(Vector *v, Generic data, int32_t index);
 
-Generic vectorGetElement(Vector *v, int32_t index);
+Generic VectorGetElement(Vector *v, int32_t index);
 
 uint32_t VectorGetSize(Vector *v);
 
 // actual memory size
 uint32_t VectorGetMemSize(Vector *v);
+
+void VectorPrint(FILE *out, Vector *v);
 
 #endif

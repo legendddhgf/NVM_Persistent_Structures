@@ -85,3 +85,16 @@ Generic SLLGetElement(SLL *sll, int32_t index) {
   fprintf(stderr, "Invalid index passed to SLLGet\n");
   exit(-1);
 }
+
+void SLLPrint(FILE *out, SLL *sll) {
+  if (sll == NULL) {
+    fprintf(stderr, "Null SLL reference passed to SLLPrint\n");
+    exit(-1);
+  }
+  fprintf(out, "List Contains: ");
+  for (SLLNode *iter = *sll; iter != NULL; iter = iter->next) {
+    fprintf(out, " ");
+    GenericPrint(out, iter->data);
+  }
+  fprintf(out, "\n");
+}

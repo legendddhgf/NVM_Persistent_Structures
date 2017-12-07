@@ -29,4 +29,6 @@ uint32_t SLLGetSize(SLL *sll);
 // actual memory size
 uint32_t SLLGetMemSize(SLL *sll);
 
+void SLLPrint(FILE *out, SLL *sll);
+
 #endif

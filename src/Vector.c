@@ -2,7 +2,7 @@
 
 // returns maxcapacity of current vector, assumes invariant of NULL at end
 // doesn't include last element of NULL in count
-uint32_t vectorGetCapacity(Vector *v) {
+uint32_t VectorGetCapacity(Vector *v) {
   if (v == NULL) {
     fprintf(stderr, "Passed NULL vector reference to vectorGetCapacity\n");
     exit(-1);
@@ -15,7 +15,7 @@ uint32_t vectorGetCapacity(Vector *v) {
 }
 
 // frees old array and set vector to a new array of double the size
-void vectorDoubleCapacity(Vector *v, uint32_t oldCap) {
+void VectorDoubleCapacity(Vector *v, uint32_t oldCap) {
   if (v == NULL) {
     fprintf(stderr, "Passed NULL vector reference to vectorDoubleCapacity\n");
     exit(-1);
@@ -35,7 +35,7 @@ void vectorDoubleCapacity(Vector *v, uint32_t oldCap) {
 }
 
 // declares a block of size VECTORINITCAP + 1 since the last index is NULL
-Vector *vectorInit(Vector *v) {
+Vector *VectorInit(Vector *v) {
   if (v == NULL) {
     fprintf(stderr, "Passed NULL vector reference to vectorInit\n");
     exit(-1);
@@ -51,7 +51,7 @@ Vector *vectorInit(Vector *v) {
 
 // Inserts data into index (range 0 to n-1) of the vector
 // This will increase the size of the vector as necessory to accomodeate index
-void vectorInsert(Vector *v, Generic data, int32_t index) {
+void VectorInsert(Vector *v, Generic data, int32_t index) {
   if (v == NULL) {
     fprintf(stderr, "Passed NULL vector reference to vectorInsert\n");
     exit(-1);
@@ -65,7 +65,7 @@ void vectorInsert(Vector *v, Generic data, int32_t index) {
   while (indexCount + 1 < index) { // checked 0 to index, thus cap is sufficient
     if (arr[indexCount] == VECTORENDMARK) {
       // at this point, indexCount == cap
-      vectorDoubleCapacity(v, indexCount);
+      VectorDoubleCapacity(v, indexCount);
     } else {
       indexCount++;
     }
@@ -76,7 +76,7 @@ void vectorInsert(Vector *v, Generic data, int32_t index) {
 
 // TODO: error if index >= cap? Currently return NULL in this case
 // Returns the item if location at index has been set and NULL otherwise
-Generic vectorGetElement(Vector *v, int32_t index) {
+Generic VectorGetElement(Vector *v, int32_t index) {
   if (v == NULL) {
     fprintf(stderr, "Passed NULL vector reference to vectorGetElement\n");
     exit(-1);
@@ -84,14 +84,14 @@ Generic vectorGetElement(Vector *v, int32_t index) {
   GenericArray arr = (GenericArray) *v;
   // Note that there technically isn't a sense of out of bounds since any index
   // (not just those adjacent to already existing ones) can be written / read
-  if (index < 0 || index >= (int32_t) vectorGetCapacity(v) ||
+  if (index < 0 || index >= (int32_t) VectorGetCapacity(v) ||
       arr[index] == VECTORINITVAL) {
     return NULL;
   }
   return arr[index];
 }
 
-uint32_t vectorGetSize(Vector *v) {
+uint32_t VectorGetSize(Vector *v) {
   if (v == NULL) {
     fprintf(stderr, "Passed NULL vector reference to vectorGetSize\n");
     exit(-1);
@@ -103,4 +103,18 @@ uint32_t vectorGetSize(Vector *v) {
     if (arr[i] != VECTORINITVAL) sizeCount++; // only if not VECTORINITVAL
   }
   return ~0; // error, shouldn't happen
+}
+
+void VectorPrint(FILE *out, Vector *v) {
+  if (v == NULL) {
+    fprintf(stderr, "Passed NULL vector reference to VectorPrint\n");
+    exit(-1);
+  }
+  GenericArray arr = (GenericArray) *v;
+  fprintf(out, "Vector Contains: ");
+  for (uint32_t iter = 0; arr[iter] != VECTORENDMARK; iter++) {
+    fprintf(out, " ");
+    GenericPrint(out, arr[iter]);
+  }
+  fprintf(out, "\n");
 }
