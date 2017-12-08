@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <immintrin.h>
 
 #define _MACROVALUE(MACRO) MACRO
 #define MACROVALUE(MACRO) _MACROVALUE(MACRO)
