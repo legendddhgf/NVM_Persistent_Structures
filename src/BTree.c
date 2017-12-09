@@ -133,7 +133,7 @@ uint32_t BTNodeAddLocation(BTNode *n, uint32_t key) {
 
 // returns the index of the median value key
 // an index of BTREEKEYLOWERLIMIT + 1 means key is median
-uint32_t BTNodeMedianValue(BTNode *n, uint32_t key) {
+uint32_t BTNodeMedianIndex(BTNode *n, uint32_t key) {
   if (key < n->keys[BTREEKEYLOWERLIMIT] &&
       key > n->keys[BTREEKEYLOWERLIMIT - 1]) {
     return BTREEKEYLOWERLIMIT + 1; // key is median
@@ -174,38 +174,71 @@ BTNode *BTNodeHighestSplit(BTNode *root, uint32_t key) {
 // accomodate one additional node and entry (target and the node it splits into)
 // The function splits target (including its keys and values)
 // It assumes target is already a child of parent and adds the split node as a
-// taget as well.
+// child as well.
+// The k/v entry is also appropriately inserted
 // Doesn't return anything since parent remains intact
 void BTNodeSplitThis(BTNode *parent, BTNode *target, uint32_t key,
     Generic value) {
-  BTNode *split = BTNodeCopy(target);
-  uint32_t medianIndex = BTNodeMedianValue(target, key);
-  uint32_t iter = 0;
+  BTNode *split = newBTNode();
+  uint32_t medianIndex = BTNodeMedianIndex(target, key);
   // find next location for entry pushed to parent / new child pointer
   // note that at worst case, last spot is available because preconditions
-  for (iter = 0; iter < BTREEKEYUPPERLIMIT - 1; iter++) {
-    if (parent->values[iter] == NULL) break; // found k/v entry location
+  uint32_t parentInsertLoc = BTNodeAddLocation(parent, key);
+  // shift everything from insertLoc and on: over by one
+  for (uint32_t i = BTREEKEYUPPERLIMIT - 2; i >= parentInsertLoc; i--) {
+    parent->keys[i + 1] = parent->keys[i];
+    parent->values[i + 1] = parent->values[i];
+    // also need to shift children to make spot for the split node
+    parent->children[i + 2] = parent->children[i + 1];
   }
+  // store entry into appropriate location
   if (medianIndex == BTREEKEYLOWERLIMIT + 1) { // key is median
-    parent->keys[iter] = key;
-    parent->values[iter] = value;
+    parent->keys[parentInsertLoc] = key;
+    parent->values[parentInsertLoc] = value;
+    // note key is used here so unlike else branch, we leave target intact here
   } else { // actual index of median
-    parent->keys[iter] = target->keys[medianIndex];
-    parent->values[iter] = target->values[medianIndex];
-  }
-  // append split as a child pointer to parent
-  parent->children[iter + 1] = split; // parent->children[iter] already target
+    parent->keys[parentInsertLoc] = target->keys[medianIndex];
+    parent->values[parentInsertLoc] = target->values[medianIndex];
 
-  // TODO: ensure appropriate entries and children are in target and split
-  //uint32_t keyIndex = BTNodeAddLocation(target, key);
-  /* TODO: sleep then look at this again
-  for (iter = 0; iter < BTREEKEYUPPERLIMIT; iter++) {
-    // TODO
+    // for target: remove medianIndex and then figure out where to put key
+
+    // first delete median index and shift everything over left to fill hole
+    for (uint32_t i = medianIndex; i < BTREEKEYUPPERLIMIT - 1; i++) {
+      target->keys[i] = target->keys[i + 1];
+      target->values[i] = target->values[i + 1];
+    }
+    // need to manually clear so this is seen as empty by BTNodeAddLocation
+    target->values[BTREEKEYUPPERLIMIT - 1] = NULL;
+
+    // then find location to insert key, shift things to make space, and insert
+    uint32_t keyInsertLoc = BTNodeAddLocation(target, key);
+    for (uint32_t i = BTREEKEYUPPERLIMIT - 2; i >= keyInsertLoc; i--) {
+      target->keys[i + 1] = target->keys[i];
+      target->values[i + 1] = target->values[i];
+    }
+    target->keys[keyInsertLoc] = key;
+    target->values[keyInsertLoc] = value;
   }
-  */
+  // add split as a child pointer to parent in determined location
+  parent->children[parentInsertLoc + 1] = split; // target already set
+
+  // first half in target, second half in split
+  for(int i = 0; i < BTREEKEYUPPERLIMIT; i++) {
+    if (i < BTREEKEYLOWERLIMIT) { // fill values
+      split->keys[i] = target->keys[BTREEKEYLOWERLIMIT + i];
+      split->values[i] = target->values[BTREEKEYLOWERLIMIT + i];
+      // BTREECHILDLOWERLIMIT nodes in target, BTREECHILDLOWERLIMIT - 1 here
+      // if !leaf, will get another child from another call to BTNodeSplitThis
+      split->children[i] = target->children[BTREECHILDLOWERLIMIT + i];
+    } else { // pad 0's
+      target->values[BTREEKEYLOWERLIMIT + i] = NULL;
+      target->children[BTREECHILDLOWERLIMIT + i] = NULL;
+      split->values[BTREEKEYLOWERLIMIT + i] = NULL;
+      split->children[BTREECHILDLOWERLIMIT + i] = NULL;
+    }
+  }
 }
 
-// TODO: so close!
 // This function is basically a helper to BTreeInsert
 // This function should only be called if a split is neccessary for insert
 // determines and performs split based off key
@@ -236,14 +269,23 @@ BTNode *BTNodeSplit(BTNode *root, uint32_t key, Generic value) {
     highestSplitParent = newBTNode();
     highestSplitParent->children[0] = newRoot; // fulfill BTNodeSplitThis precon
     BTNodeSplitThis(highestSplitParent, newRoot, key, value);
-    highestSplitParent = newRoot;
+    newRoot = highestSplitParent;
+    highestSplitParent = highestSplitParent->children[0];
   }
-  // at this point can assume root no longer needs to be split
-  //
-  // TODO: please split all nodes from highestSplitParent to targetSplitNode
-  // should basically be a loop of calling BTNodeSplitThis() which handles
-  // everything assuming parent at any given time doesn't need to be split
-
+  // split all the way down
+  while (highestSplitParent != targetSplitNode) {
+    uint32_t iter = 0;
+    for (; iter < BTREEKEYUPPERLIMIT; iter++) {
+      if (key < highestSplitParent->keys[iter]) {
+        break;
+      }
+    }
+    // TODO: WTF are you inserting
+    // can't know what to push to parent without going bottom to top
+    BTNodeSplitThis(highestSplitParent, highestSplitParent->children[iter], key,
+        value);
+    highestSplitParent = highestSplitParent->children[iter];
+  }
   // note the frees are handled where this function returns
   return newRoot; // return the newRoot the program will have
 }
@@ -287,6 +329,7 @@ void BTreeInsert(BTree *bt, Generic data, int32_t index) {
     }
     newIter->keys[keyIndex] = key;
     newIter->values[keyIndex] = data;
+    // note we don't have to shift children since this is a leaf
     if (parent != NULL) { // if it's the root, handled later
       parent->children[childIndex] = newIter;
     } else {
