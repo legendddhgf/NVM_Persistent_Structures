@@ -78,7 +78,12 @@ Applications}
 
 \section*{Abstract}
 
-This is a paper which should be read because...
+With the introduction of byte-addressable persistent memory comes the need to
+rethink the way that data in memory is interfaced and structured. At the heart
+of this research is the consideration of various persistent data structures.
+This paper seeks to determine the benefits and trade-offs of four different
+persistent data structures and suggest scenarios in which each one is best
+utilized.
 
 \pagebreak
 
@@ -89,6 +94,30 @@ This is a paper which should be read because...
 \todo[inline]{setup bibtek crap}
 
 \section{Introduction}
+
+Non-volatile memory (NVM) systems research has become a major focus. NVM
+provides the possibility of byte-addressable memory persisting across power
+cycles with latencies similar to that of DRAM. Although NVM technologies have
+yet to reach their intended potential, there are a number of topics of
+theoretical research that can be done so that NVM can be fully utilized. For
+example, with volatile memory, any corruption or bugs present in memory can be
+cleared with a power cycle but with NVM this is no longer an option. One
+requirement of structuring data in NVM is the use of persistent data structures,
+or data structures whose state cannot be invalidated. However, there are many
+data structures to choose from and the potential for new ones to be created with
+particular design focus (i.e. batch read optimized).
+
+This paper will compare four different persistent data structures in various
+scenarios. First some background on major non-volatile memory system research
+concerns will be discussed. Then the various scenarios used to compare data
+structures in this paper are described including their uses in both consumer and
+business environments. Next the implementation of the data structures is
+discussed including informal proof of their persistent correctness. Finally the
+paper discusses results of the comparisons and concludes with suggestions for
+the structures and a general statement about what these results mean about
+certain properties of certain kinds of data structures.
+
+\section{Background}
 
 \section{Methodology}
 
@@ -107,6 +136,10 @@ We multiplied results from cachegrind to reflect NVM timings accordingly...
 
 We further used pilot to aid in analysis of the results and structuring the
 benchmark.
+
+\section{Results}
+
+\section{Conclusion}
 
 \section{Citation Info}
 
