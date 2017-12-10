@@ -96,16 +96,17 @@ utilized.
 \section{Introduction}
 
 Non-volatile memory (NVM) systems research has become a major focus. NVM
-provides the possibility of byte-addressable memory persisting across power
-cycles with latencies similar to that of DRAM. Although NVM technologies have
-yet to reach their intended potential, there are a number of topics of
-theoretical research that can be done so that NVM can be fully utilized. For
-example, with volatile memory, any corruption or bugs present in memory can be
-cleared with a power cycle but with NVM this is no longer an option. One
-requirement of structuring data in NVM is the use of persistent data structures,
-or data structures whose state cannot be invalidated. However, there are many
-data structures to choose from and the potential for new ones to be created with
-particular design focus (i.e. batch read optimized).
+provides the possibility of byte-addressable memory that persists across power
+cycles while maintaining latencies similar to that of DRAM. Although NVM
+technologies have yet to reach their intended potential, there are a number of
+topics of theoretical research that can be done so that NVM can be fully
+utilized once it is more accessible. For example, with volatile memory, any
+corruption or bugs present in memory can be cleared with a power cycle but with
+NVM this is no longer an option. Thus, one requirement of structuring data in
+NVM is the use of persistent data structures, or data structures whose state
+cannot be invalidated. However, there are many data structures to choose from
+and the potential for new ones to be created with particular design focus (i.e.
+batch read optimized).
 
 This paper will compare four different persistent data structures in various
 scenarios. First some background on major non-volatile memory system research
