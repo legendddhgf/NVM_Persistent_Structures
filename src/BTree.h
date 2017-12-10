@@ -11,6 +11,14 @@
 
 typedef struct BTreeNode *BTree;
 
-BTree *newBTree(BTree *bt);
+void BTreeInit(BTree *bt);
+
+void BTreeDestroy(BTree *bt);
+
+void BTreeInsert(BTree *bt, Generic data, int32_t index);
+
+Generic BTreeGetElement(BTree *bt, int32_t key);
+
+void BTreePrint(FILE *out, BTree *bt);
 
 #endif

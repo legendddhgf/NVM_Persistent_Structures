@@ -4,7 +4,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <x86intrin.h>
 #include <immintrin.h>
+
+#ifdef VALGRIND // valgrind doesn't believe clflushopt is a real instruction
+#define _mm_clflushopt(x)
+#endif
 
 #define _MACROVALUE(MACRO) MACRO
 #define MACROVALUE(MACRO) _MACROVALUE(MACRO)

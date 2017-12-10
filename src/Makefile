@@ -7,7 +7,10 @@ HEADER = $(MODULE:%=%.h)
 MODULESRC = $(MODULE:%=%.c)
 SRC = $(MAINSRC) $(MODULESRC)
 OBJ = $(SRC:%.c=%.o)
-COMPILE = gcc -c --std=c99 -Wall -Werror -Wextra -pedantic
+COMPILE = gcc -c -g --std=c99 -Wall -Werror -Wextra -Wpedantic
+COMPILE += -msse2 -march=native
+# because valgrind doesn't like seeing you use cacheline flush and what not
+COMPILE += -DVALGRIND
 LINK = gcc -o
 REMOVE = rm -f
 

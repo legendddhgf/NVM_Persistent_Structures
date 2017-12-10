@@ -1,5 +1,4 @@
 #include "SLL.h"
-//TODO: create ExtraUtitlities library and use it for better debug statements
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,9 +15,19 @@ SLLNode *newSLLNode(Generic data, SLLNode *next) {
   return node;
 }
 
-SLL *SLLInit(SLL *sll) {
+void SLLInit(SLL *sll) {
   *sll = NULL; // initialized here
-  return sll;
+}
+
+void SLLDestroy(SLL *sll) {
+  if (sll == NULL || *sll == NULL) {
+    return;
+  }
+  SLLNode *root = *sll;
+  SLLDestroy(&root->next);
+  free(root);
+  // TODO: clflush here?
+  *sll = NULL;
 }
 
 // provide the address of the SLL of the main program.
@@ -35,11 +44,14 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
   SLLNode *sllHead = *sll;
   // insert into empty list
   if (sllHead == NULL) {
-    if (index != 0) { // only valid insertion index is 0
+    if (index != 0 && index != -1) { // only valid insertion index is 0,-1
       fprintf(stderr, "Invalid index passed to SLLInsert\n");
       exit(-1);
     }
-    *sll = newSLLNode(data, NULL); //overwrite head of original list
+    sllHead = newSLLNode(data, NULL); //overwrite head of original list
+    _mm_clflushopt(sllHead);
+    *sll = sllHead;
+    _mm_clflushopt(sll); // point of persistence
     return;
   }
   // insert into non-empty list
@@ -51,14 +63,18 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
     if (iter->next == NULL) break; // will result in an append
     iter = iter->next;
   }
-  // perform insertion
-  //
-  // TODO: mention that it's main program responsibility to track size
-  // and ensure that it doesn't go past limits of related datatypes
+
+  // perform insertion here: everything up till this point is a shadow update
   if (index == 0) { // head insertion
-    *sll = newSLLNode(data, sllHead); //make next be old head/overwrite orig head
+    sllHead = newSLLNode(data, sllHead); //make next be old head/overwrite orig head
+    _mm_clflushopt(sllHead);
+    *sll = sllHead;
+    _mm_clflushopt(sll); // point of persistence
   } else if (indexCount == index || index == -1) {
-    iter->next = newSLLNode(data, iter->next); // place directly after iter
+    SLLNode *sllNode = newSLLNode(data, iter->next); // place directly after iter
+    _mm_clflushopt(sllNode);
+    iter->next = sllNode;
+    _mm_clflushopt(iter); // point of persistence
   } else { // gave an index that was out of bounds
       fprintf(stderr, "Invalid index passed to SLLInsert\n");
       exit(-1);
@@ -80,6 +96,7 @@ Generic SLLGetElement(SLL *sll, int32_t index) {
   while (iter != NULL) {
     if (indexCount == index) return iter->data; // found item
     indexCount++;
+    if (iter->next == NULL && index == -1) return iter->data;
     iter = iter->next;
   }
   fprintf(stderr, "Invalid index passed to SLLGet\n");
@@ -91,7 +108,7 @@ void SLLPrint(FILE *out, SLL *sll) {
     fprintf(stderr, "Null SLL reference passed to SLLPrint\n");
     exit(-1);
   }
-  fprintf(out, "List Contains: ");
+  fprintf(out, "List Contains:");
   for (SLLNode *iter = *sll; iter != NULL; iter = iter->next) {
     fprintf(out, " ");
     GenericPrint(out, iter->data);

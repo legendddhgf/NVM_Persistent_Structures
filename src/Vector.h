@@ -14,7 +14,9 @@ typedef Generic * GenericArray;
 // the contiguous block of data constituting the vector
 typedef GenericArray * Vector;
 
-Vector *VectorInit(Vector *v);
+void VectorInit(Vector *v);
+
+void VectorDestroy(Vector *v);
 
 void VectorInsert(Vector *v, Generic data, int32_t index);
 

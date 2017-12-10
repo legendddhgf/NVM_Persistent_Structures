@@ -18,7 +18,9 @@ typedef struct SinglyLinkedListNode {
 
 typedef SLLNode * SLL; // we define a list to just be a pointer to a head node
 
-SLL *SLLInit(SLL *sll);
+void SLLInit(SLL *sll);
+
+void SLLDestroy(SLL *sll);
 
 void SLLInsert(SLL *sll, Generic data, int32_t index);
 

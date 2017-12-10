@@ -30,12 +30,14 @@ void VectorDoubleCapacity(Vector *v, uint32_t oldCap) {
     newArr[i] = VECTORINITVAL; // unused indices;
   }
   newArr[newCap] = VECTORENDMARK;
+  _mm_clflushopt(newArr);
   *v = (Vector) newArr; // one pointer move to persistently update the vector
+  _mm_clflushopt(v);
   free(oldArr); // No promise that there are no memory leaks, only persistence
 }
 
 // declares a block of size VECTORINITCAP + 1 since the last index is NULL
-Vector *VectorInit(Vector *v) {
+void VectorInit(Vector *v) {
   if (v == NULL) {
     fprintf(stderr, "Passed NULL vector reference to vectorInit\n");
     exit(-1);
@@ -45,8 +47,17 @@ Vector *VectorInit(Vector *v) {
     arr[i] = VECTORINITVAL; // empty fields
   }
   arr[VECTORINITCAP] = VECTORENDMARK; // mark all 1's at end of array
-  *v = (Vector) arr; // initialized here
-  return v;
+  _mm_clflushopt(arr);
+  *v = (Vector) arr; // point of persistence
+  _mm_clflushopt(v);
+}
+
+void VectorDestroy(Vector *v) {
+  if (v == NULL || *v == NULL) {
+    return;
+  }
+  free(*v);
+  *v = NULL;
 }
 
 // Inserts data into index (range 0 to n-1) of the vector
@@ -62,16 +73,18 @@ void VectorInsert(Vector *v, Generic data, int32_t index) {
   }
   int32_t indexCount = 0;
   GenericArray arr = (GenericArray) *v;
-  while (indexCount + 1 < index) { // checked 0 to index, thus cap is sufficient
+  while (indexCount - 1 < index) { // checked 0 to index, thus cap is sufficient
     if (arr[indexCount] == VECTORENDMARK) {
       // at this point, indexCount == cap
       VectorDoubleCapacity(v, indexCount);
+      arr = (GenericArray) *v;
     } else {
       indexCount++;
     }
   }
   // At this point, we can guarantee the vector can hold the data
   arr[index] = data;
+  _mm_clflushopt(arr);
 }
 
 // TODO: error if index >= cap? Currently return NULL in this case
