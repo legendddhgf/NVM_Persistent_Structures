@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[twocolumn]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage{lipsum}                     % Dummytext
@@ -64,8 +64,8 @@
 \newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 \newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
 
-\usepackage{setspace}
-\doublespacing
+%\usepackage{setspace}
+%\doublespacing
 
 \title{A Comparison of Persistent Data Structures for Non-Volatile Memory
 Applications}
@@ -84,10 +84,6 @@ of this research is the consideration of various persistent data structures.
 This paper seeks to determine the benefits and trade-offs of four different
 persistent data structures and suggest scenarios in which each one is best
 utilized.
-
-\pagebreak
-
-\tableofcontents
 
 \pagebreak
 
@@ -120,14 +116,21 @@ certain properties of certain kinds of data structures.
 
 \section{Background}
 
+\subsection{Non-Volatile Memory Based Systems}
+
+Non-Volatile Memory Systems promise to provide memory that can survive power
+cycles with the latency of DRAM. \todo[inline]{cite}
+However, they come with a number of concerns.
+
 \section{Methodology}
 
-My focus was on ...
 
 \section{Implementation}
 
 \subsection{Overview}
 
+%or so I had hoped
+\begin{comment}
 We focused on making things persistent (invalid state not possible). We also
 used clwb
 (\url{https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=clwb&expand=662}
@@ -137,6 +140,14 @@ We multiplied results from cachegrind to reflect NVM timings accordingly...
 
 We further used pilot to aid in analysis of the results and structuring the
 benchmark.
+\end{comment}
+
+\subsection{Singly Linked List}
+
+The Persistent Singly Linked List focused on constructing nodes before having
+them become connected to the rest of the data structure.
+
+\subsection{Vector}
 
 \section{Results}
 

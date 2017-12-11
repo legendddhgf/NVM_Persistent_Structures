@@ -2,7 +2,7 @@
 #include "Vector.h"
 #include "BTree.h"
 
-#define TESTRANGE (100)
+#define TESTRANGE (400)
 
 #define LISTHEADINSERT (0)
 #define LISTTAILINSERT (-1)
@@ -61,21 +61,15 @@ int main(int argc, char **argv) {
   for (uintptr_t i = 1; i <= TESTRANGE/4; i++) {
     // index doesn't matter
     // this is basically having mixed ranges of inserts instead of only seq.
-    printf("Inserting %lu\n", 5 * i * i);
-    BTreeInsert(&bt, (Generic) (5 * i * i), 0);
-    printf("Inserting %lu\n", 5 * i * i + TESTRANGE/2);
-    BTreeInsert(&bt, (Generic) (5 * i * i + TESTRANGE/2), 0);
-    printf("Inserting %lu\n", 5 * i * i + TESTRANGE/4);
-    BTreeInsert(&bt, (Generic) (5 * i * i + TESTRANGE/4), 0);
-    printf("Inserting %lu\n", 5 * i * i + 3*TESTRANGE/4);
-    BTreeInsert(&bt, (Generic) (5 * i * i + 3*TESTRANGE/4), 0);
-    printf("printing tree trace:\n");
-    BTreePrint(stdout, &bt);
+    BTreeInsert(&bt, (Generic) (5 * i), 0);
+    BTreeInsert(&bt, (Generic) (5 * (i + TESTRANGE / 2)), 0);
+    BTreeInsert(&bt, (Generic) (5 * (i + TESTRANGE / 4)), 0);
+    BTreeInsert(&bt, (Generic) (5 * (i + 3 * TESTRANGE / 4)), 0);
   }
   for (uintptr_t i = TESTRANGE; i >= 1; i--) {
-    if (BTreeGetElement(&bt, 5 * i * i) != (Generic) (5 * i * i)) {
+    if (BTreeGetElement(&bt, 5 * i) != (Generic) (5 * i)) {
       fprintf(stderr, "BTree failed GetElement at index = %lu\nTracing:\n",
-          5 * i * i);
+          5 * i);
       BTreePrint(stderr, &bt);
       exit(-1);
     }
