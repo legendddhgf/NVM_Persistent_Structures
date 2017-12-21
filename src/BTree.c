@@ -177,12 +177,13 @@ BTNode *BTNodeHighestSplit(BTNode *root, uint32_t key) {
 }
 
 // this is basically a helper function to BTNodeSplitHelper
-// call node to split, and a k/v entry to insert
+// call &node to split, and a k/v entry to insert
 // recursively splits from bottom to top
 // returns the node resulting from the split
-BTNode *BTNodeSplitHelper(BTNode *child1, uint32_t insertKey,
+BTNode *BTNodeSplitHelper(BTNode **pchild1, uint32_t insertKey,
     Generic insertValue) {
   BTNode *child2 = NULL;
+  BTNode *child1 = BTNodeCopy(*pchild1); // copy the node to modify
   // only do a recursive call if this node isn't a leaf
   if (!BTNodeIsLeaf(child1)) {
     uint32_t iter = 0;
@@ -191,7 +192,7 @@ BTNode *BTNodeSplitHelper(BTNode *child1, uint32_t insertKey,
         break;
       }
     }
-    child2 = BTNodeSplitHelper(child1->children[iter], insertKey,
+    child2 = BTNodeSplitHelper(&child1->children[iter], insertKey,
         insertValue);
   }
   BTNode *split = newBTNode();
@@ -281,6 +282,11 @@ BTNode *BTNodeSplitHelper(BTNode *child1, uint32_t insertKey,
   split->values[BTREEKEYLOWERLIMIT] = parentValue;
 
   if (child2 == NULL) { // this is a leaf, child2 is null
+    // replace original node with modified copy
+    BTNode *freeNode = *pchild1;
+    *pchild1 = child1; // TODO: point of persistence
+    BTNodeDestroy(freeNode);
+
     return split;
   }
 
@@ -318,6 +324,11 @@ BTNode *BTNodeSplitHelper(BTNode *child1, uint32_t insertKey,
   split->values[BTREEKEYLOWERLIMIT] = parentValue;
   */
 
+  // replace original node with modified copy
+  BTNode *freeNode = *pchild1;
+  *pchild1 = child1; // TODO: point of persistence
+  BTNodeDestroy(freeNode);
+
   return split; // this is the split of child1
 }
 
@@ -328,11 +339,15 @@ BTNode *BTNodeSplitHelper(BTNode *child1, uint32_t insertKey,
 // Note this all happens as a shadow update in nodes not pointed to by tree yet
 // returns: new root
 BTNode *BTNodeSplit(BTNode *root, uint32_t key, Generic value) {
-  BTNode *newRoot = (BTNode *) BTreeCopy((BTree) root);
-  // from this point on only use newRoot as part of a shadow update
+  BTNode *newRoot = root; // the newRoot may differ from the original
   BTNode *highestSplitNode = BTNodeHighestSplit(newRoot, key);
   BTNode *leafSplitNode = newRoot; // the leaf needing to be split
   BTNode *highestSplitParent = NULL; // parent of highestSplitNode
+  BTNode *highestSplitParentCopy = NULL; // parent of highestSplitNode
+  BTNode *highestSplitParentParent = NULL;
+  uint32_t parent_index = 0;
+
+  uint32_t child_index = 0; // need to save this for later recursive call
   while (!BTNodeIsLeaf(leafSplitNode)) { // set targetSplitNode correctly
     uint32_t iter = 0;
     for (; iter < BTREEKEYUPPERLIMIT; iter++) {
@@ -343,39 +358,82 @@ BTNode *BTNodeSplit(BTNode *root, uint32_t key, Generic value) {
     // set the parent of the highestSplitNode while iterating
     if (leafSplitNode->children[iter] == highestSplitNode) {
       highestSplitParent = leafSplitNode;
+      child_index = iter;
     }
     leafSplitNode = leafSplitNode->children[iter];
   }
   // if need to split root, create parent for it first
   if (highestSplitNode == newRoot) {
-    highestSplitParent = newBTNode();
-    highestSplitParent->children[0] = newRoot; // fulfill preconditions
-    highestSplitNode = newRoot;
+    highestSplitParentCopy = newBTNode();
+    highestSplitParentCopy->children[0] = newRoot; // fulfill preconditions
     // the root is the parent of the old root
-    newRoot = highestSplitParent;
+    newRoot = highestSplitParentCopy;
+    child_index = 0;
+  } else { // otherwise, make a copy of highestSplitParent
+    highestSplitParentCopy = BTNodeCopy(highestSplitParent);
+
+    // need to get its parent
+    highestSplitParentParent = newRoot;
+    // only need to iterate if the parent isn't the root
+    while (highestSplitParent != newRoot) {
+      for (parent_index = 0; parent_index < BTREEKEYUPPERLIMIT; parent_index++) {
+        if (highestSplitParentParent->values[parent_index] == NULL ||
+            key < highestSplitParentParent->keys[parent_index]) {
+          break;
+        }
+      }
+      if (highestSplitParentParent->children[parent_index] ==
+          highestSplitParent) {
+        break; // found our parent
+      }
+      // otherwise iterate to next possible node
+      highestSplitParentParent =
+        highestSplitParentParent->children[parent_index];
+    }
   }
+
   // split all the way down and get the split node of this node
-  BTNode *split = BTNodeSplitHelper(highestSplitNode, key, value);
+  BTNode *split =
+    BTNodeSplitHelper(&highestSplitParentCopy->children[child_index], key,
+        value);
 
   // parent: find the location to insert the final k/v entry and split as child
-  uint32_t keyInsertLoc = BTNodeAddLocation(highestSplitParent,
+  uint32_t keyInsertLoc = BTNodeAddLocation(highestSplitParentCopy,
       split->keys[BTREEKEYLOWERLIMIT]);
 
   for (int32_t i = BTREEKEYUPPERLIMIT - 2; i >= (int32_t) keyInsertLoc; i--) {
-    highestSplitParent->keys[i + 1] = highestSplitParent->keys[i];
-    highestSplitParent->values[i + 1] = highestSplitParent->values[i];
-    highestSplitParent->children[i + 2] = highestSplitParent->children[i + 1];
+    highestSplitParentCopy->keys[i + 1] = highestSplitParentCopy->keys[i];
+    highestSplitParentCopy->values[i + 1] = highestSplitParentCopy->values[i];
+    highestSplitParentCopy->children[i + 2] =
+      highestSplitParentCopy->children[i + 1];
   }
-  highestSplitParent->keys[keyInsertLoc] = split->keys[BTREEKEYLOWERLIMIT];
-  highestSplitParent->values[keyInsertLoc] = split->values[BTREEKEYLOWERLIMIT];
+  highestSplitParentCopy->keys[keyInsertLoc] = split->keys[BTREEKEYLOWERLIMIT];
+  highestSplitParentCopy->values[keyInsertLoc] =
+    split->values[BTREEKEYLOWERLIMIT];
   // note highestSplitParent->children[keyInsertLoc] should be highestSplitNode
-  highestSplitParent->children[keyInsertLoc + 1] = split;
+  highestSplitParentCopy->children[keyInsertLoc + 1] = split;
 
   // don't forget to clear the values passed along from split
   split->keys[BTREEKEYLOWERLIMIT] = 0;
   split->values[BTREEKEYLOWERLIMIT] = NULL;
 
-  // note the frees are handled where this function returns
+  // routine for making sure this subtree persists in the main one
+  // Note that this only happens if we don't need to split the root
+  if (highestSplitParentParent != NULL) {
+    // overwrite pointer to this node as part of the shadow update
+    // finally, replace the final pointer to the newly constructed subtree
+    if (highestSplitParent != newRoot) { // modify it's containing address
+      highestSplitParentParent->children[parent_index] = highestSplitParentCopy;
+    } else { // set the newRoot to the highestSplitParent we modified in shadow
+      newRoot = highestSplitParentCopy;
+    }
+    // TODO: point of persistence
+    //
+    // TODO: need to modify root of main program before doing this
+    // otherwise the tree isn't persistent
+    BTNodeDestroy(highestSplitParent); // delete old highestSplitParent
+  }
+
   return newRoot; // return the newRoot the program will have
 }
 
@@ -435,7 +493,6 @@ void BTreeInsert(BTree *bt, Generic data, int32_t index) {
   // note that this has to be a leaf node that we are splitting
   *bt = BTNodeSplit(root, key, data); // root is now result of split's root
   // point of persistence
-  BTreeDestroy((BTree *) &root); // replaced entire tree so free old one
 }
 
 // returns value for key or NULL if value not found
