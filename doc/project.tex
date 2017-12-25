@@ -81,11 +81,17 @@ Applications}
 With the introduction of byte-addressable persistent memory comes the need to
 rethink the way that data in memory is interfaced and structured. At the heart
 of this research is the consideration of various persistent data structures.
-This paper seeks to determine the benefits and trade-offs of four different
+This paper seeks to determine the benefits and trade-offs of five different
 persistent data structures and suggest scenarios in which each one is best
 utilized.
 
 \pagebreak
+
+\section*{Important terms and notations}
+
+\todo[inline]{make this into a nice table}
+
+The indexing scheme in all parts of this report starts at 0
 
 \todo[inline]{setup bibtek crap}
 
@@ -122,32 +128,152 @@ Non-Volatile Memory Systems promise to provide memory that can survive power
 cycles with the latency of DRAM. \todo[inline]{cite}
 However, they come with a number of concerns.
 
+\subsection{Software For NVM}
+
+\todo[inline]{mention shadow updates (I believe mnemosyne did a good job of
+describing these).}
+
 \section{Methodology}
 
+\todo[inline]{dunno if I will keep this section. I think if I do, it will
+probably just discuss my general approach to the project which may be clear from
+reading the rest of the paper anyway}
 
 \section{Implementation}
 
 \subsection{Overview}
 
-%or so I had hoped
-\begin{comment}
-We focused on making things persistent (invalid state not possible). We also
+\todo[inline]{structure everything like a K/V store: perhaps just turn the
+Generic datatype into a struct containing a key and value}
+
+\todo[inline]{this is what I plan to do}
+
+I used cachegrind (or perhaps just used timers of some sort?) to collect data
+and used the Intel's guide on emulating persistent memory with ordinary DRAM to
+emulate persistent memory performance, functionality, and primarily timings.
+(tutorial can be found here
+\url{https://software.intel.com/en-us/articles/how-to-emulate-persistent-memory-on-an-intel-architecture-server/})
+
+I focused on making things persistent (invalid state not possible). I also
 used clwb
 (\url{https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=clwb&expand=662}
 from intrinsics refernce).
 
-We multiplied results from cachegrind to reflect NVM timings accordingly...
-
-We further used pilot to aid in analysis of the results and structuring the
+I further used pilot to aid in analysis of the results and structuring the
 benchmark.
-\end{comment}
+
+Finally, note that functions listed in each data structure's documentation later
+in this section are only those that I have standardized and required for each as
+a critical operation used by the benchmark to generate results. Note that these
+functions may have different uses or ignore some of their parameters: this is
+also normal as data structures may differ in the information needed up front
+during different operations (i.e: indices in BTrees)
+
+\subsection{Benchmark}
 
 \subsection{Singly Linked List}
 
-The Persistent Singly Linked List focused on constructing nodes before having
-them become connected to the rest of the data structure.
+The Persistent Singly Linked List focused on constructing nodes before
+connecting them to the rest of the data structure. A list, or more specifically
+the head of a list, is defined to simply be a pointer to a node. Some functions
+may take pointers to lists to maintain standardization of the functions with
+different data structures and to allow changing the head of the list.
+
+\subsubsection{Init}
+
+A list of size 0, or an empty list is one where the list variable is set to
+NULL. Hence, the init function for the list simply sets the list variable to
+NULL. Guaranteed persistence of this function is also trivial. Thus, the list
+takes very little constant time and space to initialize.
+
+\subsubsection{Insert}
+
+The insert function adds a piece of data at a specified location. An item can be
+added at any location that already exists or at index = size to append.
+Alternatively, index = -1 means to append as well. An insert will place an item
+at the specified index and "re-label" items that previously were located in the
+range $[index,size-1]$ to $[index+1,size]$, hence increasing the size by 1 as
+well. "Re-label"-ing of these items is simply the result of their new placement
+relative to the head of the list and not a separate operation. Alternatively,
+providing a true value to the sorted parameter will ignore the index and ensure
+a sorted insert.
+
+This function can also be proven persistent. Up till the point that the main
+list is updated, all updates are done in the background to a single node. Hence
+upon crashing, a node is either not added / leaked, or the list is successfully
+updated since it takes a single pointer (either changing head or changing a next
+pointer). Finally, the insert function has a worst case runtime of O(size) and
+space usage of O(1) since iterating through the whole list may be required and
+space usage will at most be that of a single node, regardless of the list's
+size.
+
+\subsubsection{Update}
+
+\todo[inline]{I just came up with this function and realized that it is
+significant and common in practice. Thus, obviously the following describes how
+I \textit{will} do it rather than how I \textit{did} do it}
+
+The update function changes an entry in the list whose key matches the requested
+key. If the entry does not yet exist, an entry is appended or inserted in sorted
+order depending on whether the sorted parameter is false or true respectively.
+Updating data in a node requires the creation of the updated node as a shadow
+update. Hence on crashing, the list will either look the same as before the call
+to update or will persist the change from update. A crash may still result in a
+memory leak even if the requested update persists. Finally, since Insert is
+already proven to be persistent, update is also persistent. The runtime of
+update is bounded above by Insert's runtime and hence has the same asymptotic
+worst case runtime as that of Insert.
+
+\subsection{Delete}
+
+Delete an entry
+
+\subsection{Destroy}
+
+Destroy the list
 
 \subsection{Vector}
+
+The vector maintains a contiguous block of memory which doubles in size as
+necessary.
+
+\subsubsection{Init}
+
+\subsubsection{Insert}
+
+\dots
+
+the sorted insert may require shifting of some portion of the contiguous block
+of memory.
+
+\subsubsection{Update}
+
+\subsubsection{Delete}
+
+\subsubsection{Destroy}
+
+\subsection{BTree}
+
+Like the list implementation, the BTree is defined to be a pointer to a node and
+is NULL when empty.
+
+\subsubsection{Init}
+
+The BTree is initialized by being set to NULL. Hence, it has the same trivial
+guaranteed persistence and runtime as the list's Init function.
+
+\subsubsection{Insert}
+
+\subsubsection{Update}
+
+Only needs to replace data in a node. As a result, we only need to copy the
+node, modify the value for the key in the copy and then have the node's parent
+(or the head if this is the root) change pointers to reflect the updated node.
+If the data doesn't yet exist, an insert is performed instead.
+
+\subsubsection{Delete}
+
+\subsubsection{Destroy}
 
 \section{Results}
 
@@ -159,7 +285,7 @@ them become connected to the rest of the data structure.
 
 sources to consider:
 
-B-Trees:\\
+BTrees:\\
 \url{https://dl.acm.org/citation.cfm?doid=356770.356776}
 
 \end{document}
