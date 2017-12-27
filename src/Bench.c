@@ -4,7 +4,7 @@
 #include "Vector.h"
 #include "BTree.h"
 
-#define NUMTESTS (400000)
+#define NUMTESTS (160000)
 
 #define LISTHEADINSERT (0)
 #define LISTTAILINSERT (-1)
@@ -19,9 +19,9 @@ int main(int argc, char **argv) {
   uint64_t TimeAcc = 0;
   struct timeval start, end;
   // insert index + 1 at index for NUMTESTS different items
-  for (uintptr_t i = 1; i <= NUMTESTS; i++) {
+  for (uintptr_t i = NUMTESTS; i >= 1; i--) {
     gettimeofday(&start, NULL);
-    SLLInsert(&sll, (Generic) i, LISTTAILINSERT);
+    SLLInsert(&sll, (Generic) i, LISTHEADINSERT);
     gettimeofday(&end, NULL);
     TimeAcc += (end.tv_sec * 1e6 + end.tv_usec) -
       (start.tv_sec * 1e6 + start.tv_usec);

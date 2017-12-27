@@ -97,11 +97,20 @@ Generic VectorGetElement(Vector *v, int32_t index) {
   GenericArray arr = (GenericArray) *v;
   // Note that there technically isn't a sense of out of bounds since any index
   // (not just those adjacent to already existing ones) can be written / read
-  if (index < 0 || index >= (int32_t) VectorGetCapacity(v) ||
-      arr[index] == VECTORINITVAL) {
+  if (index < 0) {
     return NULL;
   }
-  return arr[index];
+  // check all indices up till this one to see whether this:
+  // - goes over the current vector capacity
+  // return NULL in either case
+  for (int32_t iter = 0; iter <= index; iter++) {
+    if (arr[iter] == VECTORENDMARK) {
+      return NULL;
+    }
+  }
+
+  // if unset, return NULL instead
+  return arr[index] == VECTORINITVAL ? NULL : arr[index];
 }
 
 uint32_t VectorGetSize(Vector *v) {
