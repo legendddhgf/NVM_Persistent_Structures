@@ -7,11 +7,14 @@
 #include <x86intrin.h>
 #include <immintrin.h>
 
-#ifdef VALGRIND // valgrind doesn't believe clflushopt is a real instruction
-#define _mm_clflushopt(x)
+#ifdef VALGRIND // valgrind doesn't believe _mm_clflushopt is a real instruction
+#define _mm_clflush(x) // will use when testing with VRAM
+#define _mm_clwb(x)
 #endif
 
-#define _MACROVALUE(MACRO) MACRO
+// this is one way to get the value out of a macro
+#define __MACROVALUE(MACRO) (MACRO)
+#define _MACROVALUE(MACRO) __MACROVALUE(MACRO)
 #define MACROVALUE(MACRO) _MACROVALUE(MACRO)
 
 #ifndef INTEGERBITWIDTH
@@ -29,6 +32,7 @@
 
 typedef void * Generic;
 
+uint32_t GenericHash(Generic data);
 void GenericPrint(FILE* out, Generic data);
 
 #endif

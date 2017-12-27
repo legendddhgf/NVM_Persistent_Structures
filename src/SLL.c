@@ -26,8 +26,8 @@ void SLLDestroy(SLL *sll) {
   SLLNode *root = *sll;
   SLLDestroy(&root->next);
   free(root);
-  // TODO: clflush here?
   *sll = NULL;
+  _mm_clflush(sll);
 }
 
 // provide the address of the SLL of the main program.
@@ -49,9 +49,9 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
       exit(-1);
     }
     sllHead = newSLLNode(data, NULL); //overwrite head of original list
-    _mm_clflushopt(sllHead);
+    _mm_clflush(sllHead);
     *sll = sllHead;
-    _mm_clflushopt(sll); // point of persistence
+    _mm_clflush(sll); // point of persistence
     return;
   }
   // insert into non-empty list
@@ -67,14 +67,14 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
   // perform insertion here: everything up till this point is a shadow update
   if (index == 0) { // head insertion
     sllHead = newSLLNode(data, sllHead); //make next be old head/overwrite orig head
-    _mm_clflushopt(sllHead);
+    _mm_clflush(sllHead);
     *sll = sllHead;
-    _mm_clflushopt(sll); // point of persistence
+    _mm_clflush(sll); // point of persistence
   } else if (indexCount == index || index == -1) {
     SLLNode *sllNode = newSLLNode(data, iter->next); // place directly after iter
-    _mm_clflushopt(sllNode);
+    _mm_clflush(sllNode);
     iter->next = sllNode;
-    _mm_clflushopt(iter); // point of persistence
+    _mm_clflush(iter); // point of persistence
   } else { // gave an index that was out of bounds
       fprintf(stderr, "Invalid index passed to SLLInsert\n");
       exit(-1);

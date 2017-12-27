@@ -30,9 +30,9 @@ void VectorDoubleCapacity(Vector *v, uint32_t oldCap) {
     newArr[i] = VECTORINITVAL; // unused indices;
   }
   newArr[newCap] = VECTORENDMARK;
-  _mm_clflushopt(newArr);
+  _mm_clflush(newArr);
   *v = (Vector) newArr; // one pointer move to persistently update the vector
-  _mm_clflushopt(v);
+  _mm_clflush(v);
   free(oldArr); // No promise that there are no memory leaks, only persistence
 }
 
@@ -47,9 +47,9 @@ void VectorInit(Vector *v) {
     arr[i] = VECTORINITVAL; // empty fields
   }
   arr[VECTORINITCAP] = VECTORENDMARK; // mark all 1's at end of array
-  _mm_clflushopt(arr);
+  _mm_clflush(arr);
   *v = (Vector) arr; // point of persistence
-  _mm_clflushopt(v);
+  _mm_clflush(v);
 }
 
 void VectorDestroy(Vector *v) {
@@ -84,7 +84,7 @@ void VectorInsert(Vector *v, Generic data, int32_t index) {
   }
   // At this point, we can guarantee the vector can hold the data
   arr[index] = data;
-  _mm_clflushopt(arr);
+  _mm_clflush(arr + index); // only need to flush from this index onwards
 }
 
 // TODO: error if index >= cap? Currently return NULL in this case

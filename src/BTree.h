@@ -9,7 +9,7 @@
 #define BTREEKEYLOWERLIMIT (BTREEORDER)
 #define BTREEKEYUPPERLIMIT (2 * BTREEORDER)
 
-typedef struct BTreeNode *BTree;
+typedef struct BTreeNode * BTree;
 
 void BTreeInit(BTree *bt);
 
