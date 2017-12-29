@@ -154,10 +154,19 @@ emulate persistent memory performance, functionality, and primarily timings.
 (tutorial can be found here
 \url{https://software.intel.com/en-us/articles/how-to-emulate-persistent-memory-on-an-intel-architecture-server/})
 
+The memory range used to be mapped as pmem was 1G to 3G
+
+
 I focused on making things persistent (invalid state not possible). I also
 used clwb
 (\url{https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=clwb&expand=662}
 from intrinsics refernce).
+\todo[inline]{probably will do something slightly different}
+
+I made use of libpmemobj for memory transactions (allocations/frees):
+\url{http://pmem.io/pmdk/libpmemobj/}
+which can be downloaded and installed with the entire PMDK intel library here:
+\url{https://github.com/pmem/pmdk}
 
 I further used pilot to aid in analysis of the results and structuring the
 benchmark.
@@ -287,5 +296,6 @@ sources to consider:
 
 BTrees:\\
 \url{https://dl.acm.org/citation.cfm?doid=356770.356776}
+
 
 \end{document}
