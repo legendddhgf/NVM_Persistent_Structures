@@ -240,6 +240,8 @@ Delete an entry
 \subsection{Destroy}
 
 Destroy the list
+TODO: make the destroy functions persistent by taking the NULL overwrite and
+putting it at the very beginning instead of the end
 
 \subsection{Vector}
 
@@ -248,7 +250,19 @@ necessary.
 
 \subsubsection{Init}
 
+This function allocates a contiguous block of memory with a given starting size.
+
 \subsubsection{Insert}
+
+The unsorted version of this function simply adds an item at a given index to
+the block pointed to by the vector. If the item is to be placed outside of the
+current maximum capacity of the block, then the block is reallocated and the
+original values stored in the new block. The vector then is set to point to the
+new block and the old block is freed. Since this function only overwrites
+elements in persisted blocks or changes a pointer to another persisted block,
+this function is also persistent. This function runs in worst case O(n) time
+since copying a block to another block requires iterating for the size of the
+block.
 
 \dots
 
@@ -256,6 +270,8 @@ the sorted insert may require shifting of some portion of the contiguous block
 of memory.
 
 \subsubsection{Update}
+
+This is equivalent to unsorted insert.
 
 \subsubsection{Delete}
 
