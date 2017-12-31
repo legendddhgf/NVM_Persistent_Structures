@@ -7,18 +7,19 @@ HEADER = $(MODULE:%=%.h)
 MODULESRC = $(MODULE:%=%.c)
 SRC = $(MAINSRC) $(MODULESRC)
 OBJ = $(SRC:%.c=%.o)
-COMPILE = gcc -c -g --std=c99 -Wall -Werror -Wextra -Wpedantic
-COMPILE += -msse2 -march=native
-# because valgrind doesn't like seeing you use cacheline flush and what not
-#COMPILE += -DVALGRIND
+COMPILE = gcc -c
+COMPILEFLAGS = -g --std=c99 -Wall -Werror -Wextra -Wpedantic
+COMPILEFLAGS += -msse2 -march=native
+#COMPILE += -DPMEM
 LINK = gcc -o
+LINKFLAGS = -lpmemobj
 REMOVE = rm -f
 
 $(EXE): $(OBJ)
-	$(LINK) $@ $^
+	$(LINK) $@ $^ $(LINKFLAGS)
 
 $(OBJ): $(SRC) $(HEADER)
-	$(COMPILE) $(SRC)
+	$(COMPILE) $(SRC) $(COMPILEFLAGS)
 
 clean:
 	$(REMOVE) $(OBJ)

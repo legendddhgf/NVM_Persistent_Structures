@@ -1,10 +1,11 @@
 #include <sys/time.h>
 
+#include "Common.h"
 #include "SLL.h"
 #include "Vector.h"
 #include "BTree.h"
 
-#define NUMTESTS (160000)
+#define NUMTESTS (40000)
 
 #define LISTHEADINSERT (0)
 #define LISTTAILINSERT (-1)
@@ -12,6 +13,8 @@
 int main(int argc, char **argv) {
   fprintf(stdout, "You're attempting to run %s with %d arguments, nice...\n",
       argv[0], argc);
+
+  commonInit();
 
   fprintf(stdout, "Testing SLL:\n");
   SLL sll;
@@ -134,6 +137,8 @@ int main(int argc, char **argv) {
 
   BTreeDestroy(&bt);
   fprintf(stdout, "\tBasic BTree tests PASSED\n");
+
+  commonDestroy();
 
   return 0;
 }

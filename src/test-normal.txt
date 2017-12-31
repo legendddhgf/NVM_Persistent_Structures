@@ -1,0 +1,46 @@
+legendddhgf@lordddhgf:~/Desktop/nvm_persistent_structures/src$ sudo ./NPSB 
+You're attempting to run ./NPSB with 1 arguments, nice...
+Testing SLL:
+	Time for 40000 SLLInsert calls is 9618 us
+	Time for 40000 SLLGetElement calls is 3810831 us
+	Basic SLL tests PASSED
+Testing Vector:
+	Time for 40000 VectorInsert calls is 3275835 us
+	Time for 40000 VectorGetElement calls is 3307758 us
+	Basic Vector tests PASSED
+Testing HTable:
+Testing BTree:
+	Time for 40000 BTreeInsert calls is 76263 us
+	Time for 40000 BTreeGetElement calls is 20075 us
+	Basic BTree tests PASSED
+legendddhgf@lordddhgf:~/Desktop/nvm_persistent_structures/src$ sudo ./NPSB 
+You're attempting to run ./NPSB with 1 arguments, nice...
+Testing SLL:
+	Time for 40000 SLLInsert calls is 12804 us
+	Time for 40000 SLLGetElement calls is 3810457 us
+	Basic SLL tests PASSED
+Testing Vector:
+	Time for 40000 VectorInsert calls is 3139558 us
+	Time for 40000 VectorGetElement calls is 3206276 us
+	Basic Vector tests PASSED
+Testing HTable:
+Testing BTree:
+	Time for 40000 BTreeInsert calls is 76543 us
+	Time for 40000 BTreeGetElement calls is 18794 us
+	Basic BTree tests PASSED
+legendddhgf@lordddhgf:~/Desktop/nvm_persistent_structures/src$ sudo ./NPSB 
+You're attempting to run ./NPSB with 1 arguments, nice...
+Testing SLL:
+	Time for 40000 SLLInsert calls is 11597 us
+	Time for 40000 SLLGetElement calls is 3709836 us
+	Basic SLL tests PASSED
+Testing Vector:
+	Time for 40000 VectorInsert calls is 3119359 us
+	Time for 40000 VectorGetElement calls is 3168797 us
+	Basic Vector tests PASSED
+Testing HTable:
+Testing BTree:
+	Time for 40000 BTreeInsert calls is 95163 us
+	Time for 40000 BTreeGetElement calls is 19026 us
+	Basic BTree tests PASSED
+

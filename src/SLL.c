@@ -5,7 +5,8 @@
 
 // creates a new node with data and the specified next node (can pass in NULL)
 SLLNode *newSLLNode(Generic data, SLLNode *next) {
-  SLLNode *node = malloc(sizeof(SLLNode));
+  SLLNode *node = NULL;
+  commonMalloc(&node, sizeof(SLLNode), SLLNode_TYPE);
   if (node == NULL) {
     fprintf(stderr, "Unable to allocate memory for a new SLLNode\n");
     exit(-1);
@@ -25,9 +26,9 @@ void SLLDestroy(SLL *sll) {
   }
   SLLNode *root = *sll;
   SLLDestroy(&root->next);
-  free(root);
+  commonFree(&root);
   *sll = NULL;
-  _mm_clflush(sll);
+  commonPersist(sll, sizeof(SLL));
 }
 
 // provide the address of the SLL of the main program.
@@ -49,9 +50,9 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
       exit(-1);
     }
     sllHead = newSLLNode(data, NULL); //overwrite head of original list
-    _mm_clflush(sllHead);
+    commonPersist(sllHead, sizeof(SLLNode));
     *sll = sllHead;
-    _mm_clflush(sll); // point of persistence
+    commonPersist(sll, sizeof(SLL)); // point of persistence
     return;
   }
   // insert into non-empty list
@@ -67,14 +68,14 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
   // perform insertion here: everything up till this point is a shadow update
   if (index == 0) { // head insertion
     sllHead = newSLLNode(data, sllHead); //make next be old head/overwrite orig head
-    _mm_clflush(sllHead);
+    commonPersist(sllHead, sizeof(SLLNode));
     *sll = sllHead;
-    _mm_clflush(sll); // point of persistence
+    commonPersist(sll, sizeof(SLL)); // point of persistence
   } else if (indexCount == index || index == -1) {
     SLLNode *sllNode = newSLLNode(data, iter->next); // place directly after iter
-    _mm_clflush(sllNode);
+    commonPersist(sllNode, sizeof(SLLNode));
     iter->next = sllNode;
-    _mm_clflush(iter); // point of persistence
+    commonPersist(iter, sizeof(SLLNode)); // point of persistence
   } else { // gave an index that was out of bounds
       fprintf(stderr, "Invalid index passed to SLLInsert\n");
       exit(-1);

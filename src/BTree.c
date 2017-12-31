@@ -6,8 +6,6 @@ typedef struct BTreeNode {
   struct BTreeNode **children; // contain BTREECHILDUPPERLIMIT
 } BTNode;
 
-// TODO: add the clflushes
-
 // initial call should be BTreeHeight(bt, 0)
 // returns height of tree where 1 means only root exists
 uint32_t BTreeHeight(BTree *bt, uint32_t currentDepth) {
@@ -17,10 +15,12 @@ uint32_t BTreeHeight(BTree *bt, uint32_t currentDepth) {
 }
 
 BTNode *newBTNode() {
-  BTNode *n = malloc(sizeof(BTNode));
-  n->keys = calloc(BTREEKEYUPPERLIMIT, sizeof(uint32_t));
-  n->values = calloc(BTREEKEYUPPERLIMIT, sizeof(Generic));
-  n->children = calloc(BTREECHILDUPPERLIMIT, sizeof(BTNode *));
+  BTNode *n = NULL;
+  commonMalloc(&n, sizeof(BTNode), BTNode_TYPE);
+  commonMalloc(&n->keys, BTREEKEYUPPERLIMIT * sizeof(uint32_t), uint32_t_TYPE);
+  commonMalloc(&n->values, BTREEKEYUPPERLIMIT * sizeof(Generic), Generic_TYPE);
+  commonMalloc(&n->children, BTREECHILDUPPERLIMIT * sizeof(BTNode *),
+      PBTNode_TYPE);
   return n;
 }
 
@@ -41,10 +41,10 @@ BTNode *BTNodeCopy(BTNode *n) {
 }
 
 void BTNodeDestroy(BTNode *n) {
-  free(n->keys);
-  free(n->values);
-  free(n->children);
-  free(n);
+  commonFree(&n->keys);
+  commonFree(&n->values);
+  commonFree(&n->children);
+  commonFree(&n);
 }
 
 // provide address of BTree from separate instance
@@ -278,15 +278,15 @@ BTNode *BTNodeSplitHelper(BTNode **pchild1, uint32_t insertKey,
   if (child2 == NULL) { // this is a leaf, child2 is null
     // replace original node with modified copy
     BTNode *freeNode = *pchild1;
-    _mm_clflush(child1);
+    commonPersist(child1, sizeof(BTNode));
     *pchild1 = child1;
-    _mm_clflush(pchild1);
+    commonPersist(pchild1, sizeof(BTNode *));
     BTNodeDestroy(freeNode);
 
     return split;
   }
 
-  _mm_clflush(child2); // make sure it has persisted before inserting
+  commonPersist(child2, sizeof(BTNode)); // make sure it has persisted before inserting
   // insert child2
   if (child2InsertLoc < BTREECHILDLOWERLIMIT) { // in child1
     // shift split to make space for last item in child1
@@ -323,9 +323,9 @@ BTNode *BTNodeSplitHelper(BTNode **pchild1, uint32_t insertKey,
 
   // replace original node with modified copy
   BTNode *freeNode = *pchild1;
-  _mm_clflush(child1);
+  commonPersist(child1, sizeof(BTNode));
   *pchild1 = child1;
-  _mm_clflush(pchild1);
+  commonPersist(pchild1, sizeof(BTNode *));
   BTNodeDestroy(freeNode);
 
   return split; // this is the split of child1 (note: not yet persisted)
@@ -417,11 +417,11 @@ void BTNodeSplit(BTree *bt, uint32_t key, Generic value) {
   // don't forget to clear the values passed along from split
   split->keys[BTREEKEYLOWERLIMIT] = 0;
   split->values[BTREEKEYLOWERLIMIT] = NULL;
-  _mm_clflush(split);
+  commonPersist(split, sizeof(BTNode));
 
   // note highestSplitParent->children[keyInsertLoc] should be highestSplitNode
   highestSplitParentCopy->children[keyInsertLoc + 1] = split;
-  _mm_clflush(highestSplitParentCopy);
+  commonPersist(highestSplitParentCopy, sizeof(BTNode));
 
   // routine for making sure this subtree persists in the main one
   // Note that this only happens if we don't need to split the root
@@ -430,15 +430,15 @@ void BTNodeSplit(BTree *bt, uint32_t key, Generic value) {
     // finally, replace the final pointer to the newly constructed subtree
     if (highestSplitParent != newRoot) { // modify it's containing address
       highestSplitParentParent->children[parent_index] = highestSplitParentCopy;
-      _mm_clflush(highestSplitParentParent);
+      commonPersist(highestSplitParentParent, sizeof(BTNode));
     } else { // set the newRoot to the highestSplitParent we modified in shadow
       newRoot = highestSplitParentCopy;
-      _mm_clflush(newRoot);
+      commonPersist(newRoot, sizeof(BTNode));
     }
     BTNodeDestroy(highestSplitParent); // delete old highestSplitParent
   }
   *bt = newRoot;
-  _mm_clflush(bt); // point of persistence
+  commonPersist(bt, sizeof(BTree)); // point of persistence
 }
 
 // Performs insertion of data into bt by creating a key by hashing data and
@@ -456,9 +456,9 @@ void BTreeInsert(BTree *bt, Generic data, int32_t index) {
     BTNode *n = newBTNode();
     n->keys[0] = key; // to the first location
     n->values[0] = data; // ""
-    _mm_clflush(n);
+    commonPersist(n, sizeof(BTNode));
     *bt = n; // the point of persistent change to the BTree
-    _mm_clflush(bt);
+    commonPersist(bt, sizeof(BTree));
     return;
   }
   BTNode *iter = root;
@@ -482,14 +482,14 @@ void BTreeInsert(BTree *bt, Generic data, int32_t index) {
     }
     newIter->keys[keyIndex] = key;
     newIter->values[keyIndex] = data;
-    _mm_clflush(newIter);
+    commonPersist(newIter, sizeof(BTNode));
     // note we don't have to shift children since this is a leaf
     if (parent != NULL) { // if it's the root, handled later
       parent->children[childIndex] = newIter;
-      _mm_clflush(parent);
+      commonPersist(parent, sizeof(BTNode));
     } else {
       *bt = newIter;
-      _mm_clflush(bt);
+      commonPersist(bt, sizeof(BTree));
     }
     // a point of persistence
     BTNodeDestroy(iter); // it was replaced

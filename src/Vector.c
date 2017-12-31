@@ -9,7 +9,7 @@ uint32_t VectorGetCapacity(Vector *v) {
   }
   GenericArray arr = (GenericArray) *v;
   for (int32_t i = 0; ; i++) {
-    if (arr[i] == NULL) return i; // end of arr
+    if (arr[i] == VECTORENDMARK) return i; // end of arr
   }
   return ~0; // error, shouldn't happen
 }
@@ -22,7 +22,9 @@ void VectorDoubleCapacity(Vector *v, uint32_t oldCap) {
   }
   GenericArray oldArr = (GenericArray) *v;
   uint32_t newCap = oldCap * 2;
-  GenericArray newArr = calloc(newCap + 1, sizeof(Generic)); //+1 for last item
+  GenericArray newArr = NULL;
+  commonMalloc(&newArr, (newCap + 1) * sizeof(Generic),
+      Generic_TYPE); //+1 for last item
   for (uint32_t i = 0; i < oldCap; i++) {
     newArr[i] = oldArr[i];
   }
@@ -30,10 +32,10 @@ void VectorDoubleCapacity(Vector *v, uint32_t oldCap) {
     newArr[i] = VECTORINITVAL; // unused indices;
   }
   newArr[newCap] = VECTORENDMARK;
-  _mm_clflush(newArr);
+  commonPersist(newArr, newCap + 1); // persist end marker as well
   *v = (Vector) newArr; // one pointer move to persistently update the vector
-  _mm_clflush(v);
-  free(oldArr); // No promise that there are no memory leaks, only persistence
+  commonPersist(v, 1);
+  commonFree(&oldArr);
 }
 
 // declares a block of size VECTORINITCAP + 1 since the last index is NULL
@@ -42,22 +44,27 @@ void VectorInit(Vector *v) {
     fprintf(stderr, "Passed NULL vector reference to vectorInit\n");
     exit(-1);
   }
-  GenericArray arr = calloc(VECTORINITCAP + 1, sizeof(Generic));
+  GenericArray arr = NULL;
+  commonMalloc(&arr, (VECTORINITCAP + 1) * sizeof(Generic), Generic_TYPE);
   for (int32_t i = 0; i < VECTORINITCAP; i++) {
     arr[i] = VECTORINITVAL; // empty fields
   }
   arr[VECTORINITCAP] = VECTORENDMARK; // mark all 1's at end of array
-  _mm_clflush(arr);
+  // persist end marker as well
+  commonPersist(arr, sizeof(Generic) * (VECTORINITCAP + 1));
   *v = (Vector) arr; // point of persistence
-  _mm_clflush(v);
+  commonPersist(v, sizeof(Vector));
 }
 
 void VectorDestroy(Vector *v) {
   if (v == NULL || *v == NULL) {
     return;
   }
-  free(*v);
+  uint32_t oldCap = VectorGetCapacity(v);
+  commonFree(v); // &*v
+  if (oldCap) {} // if PMEM not defined, this will give a bad time
   *v = NULL;
+  commonPersist(v, sizeof(Vector));
 }
 
 // Inserts data into index (range 0 to n-1) of the vector
@@ -84,7 +91,7 @@ void VectorInsert(Vector *v, Generic data, int32_t index) {
   }
   // At this point, we can guarantee the vector can hold the data
   arr[index] = data;
-  _mm_clflush(arr + index); // only need to flush from this index onwards
+  commonPersist(&arr[index], 1); // only need to flush from this index onwards
 }
 
 // TODO: error if index >= cap? Currently return NULL in this case
