@@ -1,3 +1,6 @@
 [submodule "doc/bib"]
 	path = doc/bib
 	url = git@bitbucket.org:ssrc/bib.git
+[submodule "src/lsm-tree"]
+	path = src/lsm-tree
+	url = git@github.com:dhanus/lsm-tree.git
