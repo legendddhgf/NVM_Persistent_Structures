@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -33,17 +34,17 @@
 
 enum TYPE_NUMS {
   Generic_TYPE, SLLNode_TYPE, GenericArray_TYPE, BTNode_TYPE, PBTNode_TYPE,
-  uint32_t_TYPE, NUM_TYPES,
+  uintptr_t_TYPE, NUM_TYPES,
 };
 
 void commonInit(void);
 void commonDestroy(void);
 
 void pmemInit(void);
-void pmemMalloc(void **POBJ, size_t SIZE, uint32_t TYPE_NUM);
+void pmemMalloc(void **POBJ, size_t SIZE, uintptr_t TYPE_NUM);
 void pmemFree(void **POBJ);
 void pmemDestroy(void);
-void pmemPersist(void *OBJ, uint32_t LEN);
+void pmemPersist(void *OBJ, uintptr_t LEN);
 
 uint8_t file_exists(const char *path);
 
@@ -90,7 +91,7 @@ uint8_t file_exists(const char *path);
 
 typedef void * Generic;
 
-uint32_t GenericHash(Generic data);
+uintptr_t GenericHash(Generic data);
 void GenericPrint(FILE* out, Generic data);
 
 #endif

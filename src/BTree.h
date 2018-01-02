@@ -3,7 +3,10 @@
 
 #include "Common.h"
 
-#define BTREEORDER 1
+#ifndef BTREEORDER /* pass through for makefile */
+#define BTREEORDER (1)
+#endif
+
 #define BTREECHILDLOWERLIMIT (BTREEORDER + 1)
 #define BTREECHILDUPPERLIMIT (2 * BTREEORDER + 1)
 #define BTREEKEYLOWERLIMIT (BTREEORDER)
@@ -15,9 +18,9 @@ void BTreeInit(BTree *bt);
 
 void BTreeDestroy(BTree *bt);
 
-void BTreeInsert(BTree *bt, Generic data, int32_t index);
+void BTreeInsert(BTree *bt, Generic data, int64_t index);
 
-Generic BTreeGetElement(BTree *bt, int32_t key);
+Generic BTreeGetElement(BTree *bt, int64_t key);
 
 void BTreePrint(FILE *out, BTree *bt);
 

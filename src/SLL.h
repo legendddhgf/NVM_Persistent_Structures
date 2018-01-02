@@ -22,14 +22,14 @@ void SLLInit(SLL *sll);
 
 void SLLDestroy(SLL *sll);
 
-void SLLInsert(SLL *sll, Generic data, int32_t index);
+void SLLInsert(SLL *sll, Generic data, int64_t index);
 
-Generic SLLGetElement(SLL *sll, int32_t index);
+Generic SLLGetElement(SLL *sll, int64_t index);
 
-uint32_t SLLGetSize(SLL *sll);
+uint64_t SLLGetSize(SLL *sll);
 
 // actual memory size
-uint32_t SLLGetMemSize(SLL *sll);
+uint64_t SLLGetMemSize(SLL *sll);
 
 void SLLPrint(FILE *out, SLL *sll);
 

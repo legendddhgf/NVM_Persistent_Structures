@@ -40,7 +40,7 @@ void pmemInit() {
 // sets *POBJ to the direct object pointer
 // example: pmemMalloc(&node, sizeof(SLLNode), SLLNode_TYPE)
 // where node is SLLNode *
-void pmemMalloc(void **POBJ, size_t SIZE, uint32_t TYPE_NUM) { \
+void pmemMalloc(void **POBJ, size_t SIZE, uintptr_t TYPE_NUM) { \
   PMEMoid OID;
   int ret = pmemobj_zalloc(pop, &OID, SIZE, TYPE_NUM);
   if (ret == -1) {
@@ -67,7 +67,7 @@ void pmemDestroy() {
   pmemobj_close(pop);
 }
 
-void pmemPersist(void *OBJ, uint32_t LEN) {
+void pmemPersist(void *OBJ, uintptr_t LEN) {
   pmemobj_persist(pop, OBJ, LEN); \
 }
 
@@ -87,7 +87,7 @@ uint8_t file_exists(const char *path) {
 
 // since Generic is using unsigned integers, hash function just returns their
 // value
-uint32_t GenericHash(Generic data) {
+uintptr_t GenericHash(Generic data) {
   return (uintptr_t) data;
 }
 

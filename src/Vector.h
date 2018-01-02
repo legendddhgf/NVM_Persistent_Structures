@@ -4,8 +4,6 @@
 #include "Common.h"
 
 #define VECTORINITCAP (2)
-// The end of GenericArray is marked with a NULL
-#define VECTORENDMARK ((Generic) NULL)
 #define VECTORINITVAL ((Generic) ~0)
 
 
@@ -18,14 +16,14 @@ void VectorInit(Vector *v);
 
 void VectorDestroy(Vector *v);
 
-void VectorInsert(Vector *v, Generic data, int32_t index);
+void VectorInsert(Vector *v, Generic data, int64_t index);
 
-Generic VectorGetElement(Vector *v, int32_t index);
+Generic VectorGetElement(Vector *v, int64_t index);
 
-uint32_t VectorGetSize(Vector *v);
+uintptr_t VectorGetSize(Vector *v);
 
 // actual memory size
-uint32_t VectorGetMemSize(Vector *v);
+uintptr_t VectorGetMemSize(Vector *v);
 
 void VectorPrint(FILE *out, Vector *v);
 

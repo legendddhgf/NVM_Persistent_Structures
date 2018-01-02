@@ -37,7 +37,7 @@ void SLLDestroy(SLL *sll) {
 //
 // index of -1 means append (I am indeed aware that this is limited by the
 // datatype of index)
-void SLLInsert(SLL *sll, Generic data, int32_t index) {
+void SLLInsert(SLL *sll, Generic data, int64_t index) {
   if (sll == NULL) {
     fprintf(stderr, "Null SLL reference passed to SLLInsert\n");
     exit(-1);
@@ -57,7 +57,7 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
   }
   // insert into non-empty list
   SLLNode *iter = sllHead; // start at front
-  int32_t indexCount = 0;
+  int64_t indexCount = 0;
   while (1) { // broken from loop manually
     if (indexCount == index) break; // break when find insertion point
     indexCount++;
@@ -86,14 +86,14 @@ void SLLInsert(SLL *sll, Generic data, int32_t index) {
 // index -1 is last item.
 //
 // program dies if item isn't found so return is undefined in this case
-Generic SLLGetElement(SLL *sll, int32_t index) {
+Generic SLLGetElement(SLL *sll, int64_t index) {
   if (sll == NULL) {
     fprintf(stderr, "Null SLL reference passed to SLLGet\n");
     exit(-1);
   }
   SLLNode *sllHead = *sll;
   SLLNode *iter = sllHead; // start at front
-  int32_t indexCount = 0;
+  int64_t indexCount = 0;
   while (iter != NULL) {
     if (indexCount == index) return iter->data; // found item
     indexCount++;

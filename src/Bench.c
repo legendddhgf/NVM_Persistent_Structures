@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "SLL.h"
 #include "Vector.h"
+#include "LSM.h"
 #include "BTree.h"
 
 #define NUMTESTS (40000)
@@ -21,7 +22,6 @@ int main(int argc, char **argv) {
   SLLInit(&sll);
   uint64_t TimeAcc = 0;
   struct timeval start, end;
-  // insert index + 1 at index for NUMTESTS different items
   for (uintptr_t i = NUMTESTS; i >= 1; i--) {
     gettimeofday(&start, NULL);
     SLLInsert(&sll, (Generic) i, LISTHEADINSERT);
@@ -34,7 +34,6 @@ int main(int argc, char **argv) {
       NUMTESTS, TimeAcc);
 
   TimeAcc = 0;
-  // check that above insertion is valid but in reverse order
   for (uintptr_t i = NUMTESTS; i >= 1; i--) {
     gettimeofday(&start, NULL);
     Generic data = SLLGetElement(&sll, i - 1);
@@ -94,7 +93,42 @@ int main(int argc, char **argv) {
   VectorDestroy(&v);
   fprintf(stdout, "\tBasic Vector tests PASSED\n");
 
-  fprintf(stdout, "Testing HTable:\n");
+  fprintf(stdout, "Testing LSM:\n");
+  LSM *lsm;
+  LSMInit(&lsm);
+
+  TimeAcc = 0;
+  for (uintptr_t i = NUMTESTS; i >= 1; i--) {
+    gettimeofday(&start, NULL);
+    LSMInsert(&lsm, (Generic) i, 0);
+    gettimeofday(&end, NULL);
+    TimeAcc += (end.tv_sec * 1e6 + end.tv_usec) -
+      (start.tv_sec * 1e6 + start.tv_usec);
+  }
+
+  printf("\tTime for %d LSMInsert calls is %lu us\n",
+      NUMTESTS, TimeAcc);
+
+  TimeAcc = 0;
+  for (uintptr_t i = NUMTESTS; i >= 1; i--) {
+    gettimeofday(&start, NULL);
+    Generic data = LSMGetElement(&lsm, i);
+    gettimeofday(&end, NULL);
+    if (data != (Generic) i) {
+      fprintf(stderr, "LSM failed GetElement at index = %lu\nTracing:\n",
+          i - 1);
+      LSMPrint(stderr, &lsm);
+      exit(-1);
+    }
+    TimeAcc += (end.tv_sec * 1e6 + end.tv_usec) -
+      (start.tv_sec * 1e6 + start.tv_usec);
+  }
+
+  printf("\tTime for %d LSMGetElement calls is %lu us\n",
+      NUMTESTS, TimeAcc);
+
+  LSMDestroy(&lsm);
+  fprintf(stdout, "\tBasic LSM tests PASSED\n");
 
   fprintf(stdout, "Testing BTree:\n");
   BTree bt;

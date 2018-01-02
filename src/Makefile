@@ -2,7 +2,7 @@
 EXE = NPSB
 MAIN = Bench
 MAINSRC = $(MAIN:%=%.c)
-MODULE = SLL Vector BTree Common
+MODULE = SLL Vector BTree LSM Common
 HEADER = $(MODULE:%=%.h)
 MODULESRC = $(MODULE:%=%.c)
 SRC = $(MAINSRC) $(MODULESRC)
