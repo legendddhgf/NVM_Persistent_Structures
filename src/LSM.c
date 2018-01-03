@@ -105,6 +105,9 @@ void destruct_lsm(lsm* tree){
 Args:
 tree (lsm*): pointer to LSM object to destroy.
 */
+  FILE *fp = fopen(tree->disk1, "w"); // clear the file
+  fclose(fp);
+
   free(tree->block);
   free(tree);
 }
@@ -218,6 +221,7 @@ tree (lsm*): pointer to an lsm tree.
       if(fclose(f)){
         perror("search_disk: fclose: ");
       }
+      free(file_data);
       return ni;
     }
   }
@@ -291,6 +295,7 @@ tree (lsm*): pointer to an lsm tree.
   }
   FILE* fw  = fopen(tree->disk1, "w");
   if(complete_data == NULL){
+    free(complete_data);
     complete_data = tree->block;
   }
   if(num_elements <= 0){
@@ -315,6 +320,7 @@ tree (lsm*): pointer to an lsm tree.
   if(fclose(fw)){
     perror("put: close 2: \n");
   }
+  free(complete_data);
   return 0;
 }
 

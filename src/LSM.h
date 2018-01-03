@@ -28,7 +28,7 @@ typedef struct LSMInternalNode{
 } LSMINode;
 
 #ifndef LSM_BLOCK_SIZE /* pass through for Makefile */
-#define LSM_BLOCK_SIZE 64e3 /* 64 kbytes */
+#define LSM_BLOCK_SIZE 256 /* 256 bytes */
 #endif
 
 #ifndef LSM_SORTED
