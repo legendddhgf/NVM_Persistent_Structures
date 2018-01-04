@@ -33,8 +33,8 @@
 #define COMMON_LAYOUT "COMMON_LAYOUT"
 
 enum TYPE_NUMS {
-  Generic_TYPE, SLLNode_TYPE, GenericArray_TYPE, BTNode_TYPE, PBTNode_TYPE,
-  uintptr_t_TYPE, NUM_TYPES,
+  Generic_TYPE, SLLNode_TYPE, GenericArray_TYPE, LSM_TYPE, LSMNode_TYPE,
+  LSMINode_TYPE, BTNode_TYPE, PBTNode_TYPE, uintptr_t_TYPE, NUM_TYPES,
 };
 
 void commonInit(void);

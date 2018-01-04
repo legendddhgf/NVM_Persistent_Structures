@@ -29,7 +29,8 @@ void LSMInsert(LSM **plsm, Generic data, int64_t index) {
 Generic LSMGetElement(LSM **plsm, int64_t key) {
   LSMNode *ret = get((const keyType) key, *plsm);
   Generic retData = ret != NULL ? ret->val : NULL;
-  free(ret); // because the author of this code decided to malloc in a get func
+  // because the author of this code decided to malloc in a get func
+  commonFree(&ret);
   return retData;
 }
 
@@ -75,7 +76,7 @@ Returns:
 populated lsm object.
 */
   lsm* tree;
-  tree = malloc(sizeof(lsm));
+  commonMalloc(&tree, sizeof(lsm), LSM_TYPE);
   if(!tree){
     perror("init_lsm: block is null \n");
     return NULL;
@@ -84,7 +85,7 @@ populated lsm object.
   tree->k = 2;
   tree->next_empty = 0;
   tree->node_size = sizeof(node);
-  tree->block = malloc(tree->block_size*tree->node_size);
+  commonMalloc(&tree->block, tree->block_size*tree->node_size, LSMNode_TYPE);
   if(!tree->block){
     perror("init_lsm: block is null \n");
     return NULL;
@@ -108,8 +109,8 @@ tree (lsm*): pointer to LSM object to destroy.
   FILE *fp = fopen(tree->disk1, "w"); // clear the file
   fclose(fp);
 
-  free(tree->block);
-  free(tree);
+  commonFree(&tree->block);
+  commonFree(&tree);
 }
 
 void merge(node *whole, node *left,int left_size,node *right,int right_size){
@@ -158,8 +159,8 @@ n (int): int describing the size of the block to be sorted.
   node *right;
 
   /* create and populate left and right subarrays */
-  left = (node*)malloc(mid*sizeof(node));
-  right = (node*)malloc((n-mid)*sizeof(node));
+  commonMalloc(&left, mid*sizeof(node), LSMNode_TYPE);
+  commonMalloc(&right, (n-mid)*sizeof(node), LSMNode_TYPE);
 
   memcpy(left, block, sizeof(node) * mid);
   memcpy(right, &block[mid], sizeof(node) * (n - mid));
@@ -168,8 +169,8 @@ n (int): int describing the size of the block to be sorted.
   merge_sort(left,mid);  // sort left subarray
   merge_sort(right,n-mid);  // sort right subarray
   merge(block,left,mid,right,n-mid);
-  free(left);
-  free(right);
+  commonFree(&left);
+  commonFree(&right);
 }
 
 
@@ -181,8 +182,9 @@ tree (lsm*): pointer to an lsm tree.
 */
   for (size_t i = 0; i < tree->next_empty; i++){
     if (tree->block[i].key == *key){
-      nodei* ni = malloc(sizeof(nodei));
-      ni->node = malloc(sizeof(node));
+      nodei* ni = NULL;
+      commonMalloc(&ni, sizeof(nodei), LSMINode_TYPE);
+      commonMalloc(&ni->node, sizeof(node), LSMNode_TYPE);
       ni->node->key = tree->block[i].key;
       ni->node->val = tree->block[i].val;
       ni->index = i;
@@ -208,24 +210,25 @@ tree (lsm*): pointer to an lsm tree.
   size_t num_elements;
   r = fread(&num_elements, sizeof(size_t), 1, f);
   check_file_ret(f, r);
-  file_data = malloc(sizeof(node)*num_elements);
+  commonMalloc(&file_data, sizeof(node)*num_elements, LSMNode_TYPE);
   r = fread(file_data, sizeof(node), num_elements, f);
   check_file_ret(f, r);
   for(size_t i = 0; i < num_elements; i++){
     if (file_data[i].key == *key){
-      nodei* ni = malloc(sizeof(nodei));
-      ni->node = malloc(sizeof(node));
+      nodei* ni = NULL;
+      commonMalloc(&ni, sizeof(nodei), LSMINode_TYPE);
+      commonMalloc(&ni->node, sizeof(node), LSMNode_TYPE);
       ni->node->key = file_data[i].key;
       ni->node->val = file_data[i].val;
       ni->index = i;
       if(fclose(f)){
         perror("search_disk: fclose: ");
       }
-      free(file_data);
+      commonFree(&file_data);
       return ni;
     }
   }
-  free(file_data);
+  commonFree(&file_data);
   if(fclose(f)){
     perror("search_disk: fclose: ");
   }
@@ -242,14 +245,14 @@ tree (lsm*): pointer to an lsm tree.
   nodei* ni = search_buffer(&key, tree);
   if(ni != NULL){
     node* ret_buffer = ni->node;
-    free(ni);
+    commonFree(&ni);
     return ret_buffer;
   } else{
     // search through the file on disk for this item
     ni = search_disk(&key, tree);
     if(ni != NULL){
       node* ret_disk = ni->node;
-      free(ni);
+      commonFree(&ni);
       return ret_disk;
     }
   }
@@ -279,7 +282,7 @@ tree (lsm*): pointer to an lsm tree.
     r = fread(&num_elements, sizeof(size_t), 1, fr);
     check_file_ret(fr, r);
     // allocate memory for nodes on disk
-    file_data = malloc(sizeof(node)*num_elements);
+    commonMalloc(&file_data, sizeof(node)*num_elements, LSMNode_TYPE);
     assert(file_data);
     // read nodes on disk into memory
     r = fread(file_data, sizeof(node), num_elements, fr);
@@ -288,14 +291,15 @@ tree (lsm*): pointer to an lsm tree.
       perror("put: close 2: \n");
     }
     // merge the sorted buffer and the sorted disk contents
-    complete_data = malloc(sizeof(node)*(num_elements+tree->next_empty));
+    commonMalloc(&complete_data, sizeof(node)*(num_elements+tree->next_empty),
+          LSMNode_TYPE);
     merge(complete_data, file_data, num_elements, tree->block,tree->next_empty);
     num_elements += tree->block_size;
-    free(file_data);
+    commonFree(&file_data);
   }
   FILE* fw  = fopen(tree->disk1, "w");
   if(complete_data == NULL){
-    free(complete_data);
+    commonFree(&complete_data);
     complete_data = tree->block;
   }
   if(num_elements <= 0){
@@ -320,7 +324,7 @@ tree (lsm*): pointer to an lsm tree.
   if(fclose(fw)){
     perror("put: close 2: \n");
   }
-  free(complete_data);
+  commonFree(&complete_data);
   return 0;
 }
 
@@ -372,7 +376,7 @@ tree (lsm*): lsm object to delete it from.
     r = fread(&num_elements, sizeof(size_t), 1, fr);
     check_file_ret(fr, r);
     // allocate memory for nodes on disk
-    file_data = malloc(sizeof(node)*num_elements);
+    commonMalloc(&file_data, sizeof(node)*num_elements, LSMNode_TYPE);
     assert(file_data);
     // read nodes on disk into memory
     r = fread(file_data, sizeof(node), num_elements, fr);
@@ -463,7 +467,7 @@ tree (lsm*): pointer to lsm associated with data.
       perror("EOF found\n");
     }
   }
-  file_data = malloc(sizeof(node)*num_elements);
+  commonMalloc(&file_data, sizeof(node)*num_elements, LSMNode_TYPE);
   if(file_data == NULL){
     perror("print_disk_data: unsuccessful allocation \n");
   }
