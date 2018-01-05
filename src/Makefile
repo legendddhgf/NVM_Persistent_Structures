@@ -18,7 +18,7 @@ SRCCPP = $(MAINSRCCPP) $(MODULESRCCPP)
 OBJC = $(SRCC:%.c=%.o)
 OBJCPP = $(SRCCPP:%.cpp=%.o)
 COMPILEC = gcc -c
-#COMPILEC += -DPMEM
+COMPILECPERSIST = -DPMEM
 COMPILECPP = g++ -c
 COMPILECFLAGS = -g --std=c99 -Wall -Werror -Wextra -Wpedantic
 COMPILECFLAGS += -msse2 -march=native
@@ -29,12 +29,26 @@ LINKCPP = g++ -o
 LINKCPPFLAGS = $(LINKCFLAGS) -lpilot
 REMOVE = rm -f
 
+# non-persistent tests
 $(EXE): $(OBJCPP) $(OBJC)
-	$(LINKCPP) $@ $^ $(LINKCPPFLAGS)
+	$(LINKCPP) $(EXE) $(OBJCPP) $(OBJC) $(LINKCPPFLAGS)
+
+# persistent tests
+pexe: $(OBJCPP) OBJCPERSIST
+	$(LINKCPP) $(EXE) $(OBJCPP) $(OBJC) $(LINKCPPFLAGS)
+
+run-all: clean run clean prun
 
 run: $(EXE)
 	./$(EXE)
 	./get_results.sh
+
+prun: pexe
+	sudo ./$(EXE)
+	./get_results.sh
+
+check: $(EXE)
+	valgrind --leak-check=full --show-leak-kinds=all -v ./$(EXE)
 
 $(OBJCPP): $(SRCCPP) $(HEADERCPP)
 	$(COMPILECPP) $(SRCCPP) $(COMPILECPPFLAGS)
@@ -42,10 +56,13 @@ $(OBJCPP): $(SRCCPP) $(HEADERCPP)
 $(OBJC): $(SRCC) $(HEADERC)
 	$(COMPILEC) $(SRCC) $(COMPILECFLAGS)
 
+OBJCPERSIST: $(SRCC) $(HEADERC)
+	$(COMPILEC) $(COMPILECPERSIST) $(SRCC) $(COMPILECFLAGS)
+
 clean:
 	$(REMOVE) $(OBJC) $(OBJCPP)
 
 spotless: clean
 	$(REMOVE) $(EXE)
 
-.PHONY: clean spotless run
+.PHONY: clean spotless run prun run-all check OBJCPERSIST

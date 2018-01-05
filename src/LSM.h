@@ -35,6 +35,10 @@ typedef struct LSMInternalNode{
 #define LSM_SORTED FALSE
 #endif
 
+#ifndef LSM_DISK_PATH
+#define LSM_DISK_PATH "/tmp/lsm_storage.txt"
+#endif
+
 /* wrappers created to maintain my standard naming conventions */
 
 void LSMInit(LSM **plsm);
@@ -46,6 +50,8 @@ Generic LSMGetElement(LSM **plsm, int64_t key);
 void LSMDestroy(LSM **plsm);
 
 void LSMPrint(FILE *out, LSM **plsm);
+
+uintptr_t LSMGetMemSize(LSM **plsm);
 
 /* end my wrappers */
 

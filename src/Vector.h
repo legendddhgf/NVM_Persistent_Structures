@@ -10,7 +10,7 @@
 typedef Generic * GenericArray;
 
 // the contiguous block of data constituting the vector
-typedef GenericArray * Vector;
+typedef GenericArray Vector;
 
 void VectorInit(Vector *v);
 

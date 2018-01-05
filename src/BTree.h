@@ -22,6 +22,8 @@ void BTreeInsert(BTree *bt, Generic data, int64_t index);
 
 Generic BTreeGetElement(BTree *bt, int64_t key);
 
+uintptr_t BTreeGetMemSize(BTree *bt);
+
 void BTreePrint(FILE *out, BTree *bt);
 
 #endif

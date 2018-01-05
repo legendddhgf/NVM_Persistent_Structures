@@ -17,7 +17,7 @@ uintptr_t BTreeHeight(BTree *bt, uint64_t currentDepth) {
 BTNode *newBTNode() {
   BTNode *n = NULL;
   commonMalloc(&n, sizeof(BTNode), BTNode_TYPE);
-  commonMalloc(&n->keys, BTREEKEYUPPERLIMIT * sizeof(uintptr_t), uint64_t_TYPE);
+  commonMalloc(&n->keys, BTREEKEYUPPERLIMIT * sizeof(uintptr_t), uintptr_t_TYPE);
   commonMalloc(&n->values, BTREEKEYUPPERLIMIT * sizeof(Generic), Generic_TYPE);
   commonMalloc(&n->children, BTREECHILDUPPERLIMIT * sizeof(BTNode *),
       PBTNode_TYPE);
@@ -437,7 +437,6 @@ void BTNodeSplit(BTree *bt, uintptr_t key, Generic value) {
     BTNodeDestroy(highestSplitParent); // delete old highestSplitParent
   }
   *bt = newRoot;
-  commonPersist(bt, sizeof(BTree)); // point of persistence
 }
 
 // Performs insertion of data into bt by creating a key by hashing data and
@@ -457,7 +456,6 @@ void BTreeInsert(BTree *bt, Generic data, int64_t index) {
     n->values[0] = data; // ""
     commonPersist(n, sizeof(BTNode));
     *bt = n; // the point of persistent change to the BTree
-    commonPersist(bt, sizeof(BTree));
     return;
   }
   BTNode *iter = root;
@@ -488,7 +486,6 @@ void BTreeInsert(BTree *bt, Generic data, int64_t index) {
       commonPersist(parent, sizeof(BTNode));
     } else {
       *bt = newIter;
-      commonPersist(bt, sizeof(BTree));
     }
     // a point of persistence
     BTNodeDestroy(iter); // it was replaced
@@ -519,6 +516,20 @@ Generic BTreeGetElement(BTree *bt, int64_t key) {
     }
   }
   return BTreeGetElement(&root->children[iter], key);
+}
+
+// recursively returns memory size
+uintptr_t BTreeGetMemSize(BTree *bt) {
+  if (bt == NULL || *bt == NULL) {
+    return 0;
+  }
+  BTNode *root = (BTNode *) *bt;
+  uintptr_t memSize = 0;
+  for (uintptr_t iter = 0; iter < BTREECHILDUPPERLIMIT; iter++) {
+    memSize += BTreeGetMemSize((BTree *) &root->children[iter]);
+  }
+  memSize += sizeof(BTNode);
+  return memSize;
 }
 
 // call from BTreePrint and recursively does depth first traversal

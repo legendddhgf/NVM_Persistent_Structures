@@ -15,7 +15,11 @@ struct timeval start, end;
 int SLLTestBasic() {
 
   fprintf(stdout, "Testing SLL:\n");
+#ifdef PMEM
+  resFile = fopen("PMEMSLLBasicResults.csv", "w");
+#else
   resFile = fopen("SLLBasicResults.csv", "w");
+#endif
   fprintf(resFile, "insert() runtime [ms],get() runtime [ms],"
       "memory usage [kB],\n");
   uint64_t trial_count = 0;
@@ -54,8 +58,8 @@ int SLLTestBasic() {
         trial_count, TESTRANGE, TimeAcc);
     fprintf(resFile, "%.3lf,", ((double) TimeAcc) / 1e3);
 
-    // TODO: memory reading
-    fprintf(resFile, "0,");
+    // memory reading
+    fprintf(resFile, "%.3lf,", ((double) SLLGetMemSize(&sll)) / 1e3);
 
     SLLDestroy(&sll);
     fprintf(resFile, "\n"); // end of this trial result
@@ -71,7 +75,11 @@ int SLLTestBasic() {
 int VectorTestBasic() {
 
   fprintf(stdout, "Testing Vector:\n");
+#ifdef PMEM
+  resFile = fopen("PMEMVectorBasicResults.csv", "w");
+#else
   resFile = fopen("VectorBasicResults.csv", "w");
+#endif
   fprintf(resFile, "insert() runtime [ms],get() runtime [ms],"
       "memory usage [kB],\n");
 
@@ -83,7 +91,7 @@ int VectorTestBasic() {
     TimeAcc = 0;
     for (uintptr_t i = 1; i <= TESTRANGE; i++) {
       gettimeofday(&start, NULL);
-      VectorInsert(&v, (Generic) i, 2 * i - 1);
+      VectorInsert(&v, (Generic) i, i);
       gettimeofday(&end, NULL);
       TimeAcc += (end.tv_sec * 1e6 + end.tv_usec) -
         (start.tv_sec * 1e6 + start.tv_usec);
@@ -94,13 +102,13 @@ int VectorTestBasic() {
     fprintf(resFile, "%.3lf,", ((double) TimeAcc) / 1e3);
 
     TimeAcc = 0;
-    for (uintptr_t i = TESTRANGE; i >= 1; i--) {
+    for (uintptr_t i = 1; i <= TESTRANGE; i++) {
       gettimeofday(&start, NULL);
-      Generic data = VectorGetElement(&v, 2 * i - 1);
+      Generic data = VectorGetElement(&v, i);
       gettimeofday(&end, NULL);
       if (data != (Generic) i) {
         fprintf(stderr, "Vector failed GetElement at index = %lu\nTracing:\n",
-            2 * i - 1);
+            i);
         VectorPrint(stderr, &v);
         return 1;
       }
@@ -112,8 +120,8 @@ int VectorTestBasic() {
         trial_count, TESTRANGE, TimeAcc);
     fprintf(resFile, "%.3lf,", ((double) TimeAcc) / 1e3);
 
-    // TODO: memory reading
-    fprintf(resFile, "0,");
+    // memory reading
+    fprintf(resFile, "%.3lf,", ((double) VectorGetMemSize(&v)) / 1e3);
 
     VectorDestroy(&v);
     fprintf(resFile, "\n"); // end of this trial result
@@ -128,7 +136,11 @@ int VectorTestBasic() {
 int LSMTestBasic() {
 
   fprintf(stdout, "Testing LSM:\n");
+#ifdef PMEM
+  resFile = fopen("PMEMLSMBasicResults.csv", "w");
+#else
   resFile = fopen("LSMBasicResults.csv", "w");
+#endif
   fprintf(resFile, "insert() runtime [ms],get() runtime [ms],"
       "memory usage [kB],\n");
 
@@ -138,7 +150,7 @@ int LSMTestBasic() {
     LSMInit(&lsm);
 
     TimeAcc = 0;
-    for (uintptr_t i = TESTRANGE; i >= 1; i--) {
+    for (uintptr_t i = 1; i <= TESTRANGE; i++) {
       gettimeofday(&start, NULL);
       LSMInsert(&lsm, (Generic) i, 0);
       gettimeofday(&end, NULL);
@@ -151,13 +163,13 @@ int LSMTestBasic() {
     fprintf(resFile, "%.3lf,", ((double) TimeAcc) / 1e3);
 
     TimeAcc = 0;
-    for (uintptr_t i = TESTRANGE; i >= 1; i--) {
+    for (uintptr_t i = 1; i <= TESTRANGE; i++) {
       gettimeofday(&start, NULL);
       Generic data = LSMGetElement(&lsm, i);
       gettimeofday(&end, NULL);
       if (data != (Generic) i) {
         fprintf(stderr, "LSM failed GetElement at index = %lu\nTracing:\n",
-            i - 1);
+            i);
         LSMPrint(stderr, &lsm);
         exit(-1);
       }
@@ -169,8 +181,8 @@ int LSMTestBasic() {
         trial_count, TESTRANGE, TimeAcc);
     fprintf(resFile, "%.3lf,", ((double) TimeAcc) / 1e3);
 
-    // TODO: memory reading
-    fprintf(resFile, "0,");
+    // memory reading
+    fprintf(resFile, "%.3lf,", ((double) LSMGetMemSize(&lsm)) / 1e3);
 
     LSMDestroy(&lsm);
     fprintf(resFile, "\n"); // end of this trial result
@@ -184,7 +196,11 @@ int LSMTestBasic() {
 int BTreeTestBasic() {
 
   fprintf(stdout, "Testing BTree:\n");
+#ifdef PMEM
+  resFile = fopen("PMEMBTreeBasicResults.csv", "w");
+#else
   resFile = fopen("BTreeBasicResults.csv", "w");
+#endif
   fprintf(resFile, "insert() runtime [ms],get() runtime [ms],"
       "memory usage [kB],\n");
 
@@ -194,14 +210,11 @@ int BTreeTestBasic() {
     BTreeInit(&bt);
 
     TimeAcc = 0;
-    for (uintptr_t i = 1; i <= TESTRANGE/4; i++) {
+    for (uintptr_t i = 1; i <= TESTRANGE; i++) {
       // index doesn't matter
       // this is basically having mixed ranges of inserts instead of only seq.
       gettimeofday(&start, NULL);
-      BTreeInsert(&bt, (Generic) (5 * i), 0);
-      BTreeInsert(&bt, (Generic) (5 * (i + TESTRANGE / 2)), 0);
-      BTreeInsert(&bt, (Generic) (5 * (i + TESTRANGE / 4)), 0);
-      BTreeInsert(&bt, (Generic) (5 * (i + 3 * TESTRANGE / 4)), 0);
+      BTreeInsert(&bt, (Generic) i, 0);
       gettimeofday(&end, NULL);
       TimeAcc += (end.tv_sec * 1e6 + end.tv_usec) -
         (start.tv_sec * 1e6 + start.tv_usec);
@@ -212,13 +225,13 @@ int BTreeTestBasic() {
 
 
     TimeAcc = 0;
-    for (uintptr_t i = TESTRANGE; i >= 1; i--) {
+    for (uintptr_t i = 1; i <= TESTRANGE; i++) {
       gettimeofday(&start, NULL);
-      Generic data = BTreeGetElement(&bt, 5 * i);
+      Generic data = BTreeGetElement(&bt, i);
       gettimeofday(&end, NULL);
-      if (data != (Generic) (5 * i)) {
+      if (data != (Generic) (i)) {
         fprintf(stderr, "BTree failed GetElement at index = %lu\nTracing:\n",
-            5 * i);
+            i);
         BTreePrint(stderr, &bt);
         exit(-1);
       }
@@ -230,8 +243,8 @@ int BTreeTestBasic() {
         trial_count, TESTRANGE, TimeAcc);
     fprintf(resFile, "%.3lf,", ((double) TimeAcc) / 1e3);
 
-    // TODO: memory reading
-    fprintf(resFile, "0,");
+    // memory reading
+    fprintf(resFile, "%.3lf,", ((double) BTreeGetMemSize(&bt)) / 1e3);
 
     BTreeDestroy(&bt);
     fprintf(resFile, "\n"); // end of this trial result

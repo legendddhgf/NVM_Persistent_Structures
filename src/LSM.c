@@ -17,6 +17,7 @@ typedef LSM lsm; /* "" */
 
 void LSMInit(LSM **plsm) {
   *plsm = init_new_lsm();
+  commonPersist(*plsm, sizeof(LSM));
 }
 
 void LSMInsert(LSM **plsm, Generic data, int64_t index) {
@@ -47,7 +48,12 @@ void LSMPrint(FILE *out, LSM **plsm) {
   print_disk_data(out, *plsm);
 }
 
-/* end my wrappers */
+uintptr_t LSMGetMemSize(LSM **plsm) {
+  LSM *tree = *plsm;
+  return sizeof(LSM) + tree->block_size*tree->node_size;
+}
+
+/* end wrappers */
 
 void check_file_ret(FILE* f, int r){
   if (TRUE) return; // Contextless function that prints unnecessary garbage
@@ -90,12 +96,14 @@ populated lsm object.
     perror("init_lsm: block is null \n");
     return NULL;
   }
-  tree->disk1 = "/tmp/disk_storage.txt";
+  tree->disk1 = LSM_DISK_PATH;
   FILE *fp = fopen(tree->disk1, "r");
   if (!fp) { // if the file doesn't exist, create it
     fp = fopen(tree->disk1, "w");
   }
   fclose(fp);
+
+
   tree->sorted = LSM_SORTED;
   return tree;
 }
@@ -106,9 +114,10 @@ void destruct_lsm(lsm* tree){
 Args:
 tree (lsm*): pointer to LSM object to destroy.
 */
-  FILE *fp = fopen(tree->disk1, "w"); // clear the file
+  // clear disk data
+  FILE *fp = fopen(tree->disk1, "w");
   fclose(fp);
-
+  // clear memory
   commonFree(&tree->block);
   commonFree(&tree);
 }
@@ -272,24 +281,27 @@ tree (lsm*): pointer to an lsm tree.
   //sort the buffer
   if(tree->sorted){
     merge_sort(tree->block, tree->next_empty);
+    // size based off alllocation in init func
+    commonPersist(tree->block, tree->block_size * tree->node_size);
   }
   struct stat s;
   int file_exists = stat(tree->disk1, &s);
+  FILE *fr = NULL;
   if(file_exists == 0){
     // the file already exists
-    FILE* fr  = fopen(tree->disk1, "r");
+    fr  = fopen(tree->disk1, "r");
     // read number of elements
     r = fread(&num_elements, sizeof(size_t), 1, fr);
     check_file_ret(fr, r);
+  }
+  // if there are are less than 0 elements, the file may as well not exist
+  if (num_elements > 0) {
     // allocate memory for nodes on disk
     commonMalloc(&file_data, sizeof(node)*num_elements, LSMNode_TYPE);
     assert(file_data);
     // read nodes on disk into memory
     r = fread(file_data, sizeof(node), num_elements, fr);
     check_file_ret(fr, r);
-    if(fclose(fr)){
-      perror("put: close 2: \n");
-    }
     // merge the sorted buffer and the sorted disk contents
     commonMalloc(&complete_data, sizeof(node)*(num_elements+tree->next_empty),
           LSMNode_TYPE);
@@ -297,9 +309,13 @@ tree (lsm*): pointer to an lsm tree.
     num_elements += tree->block_size;
     commonFree(&file_data);
   }
+  if (file_exists == 0) {
+    if(fclose(fr)){
+      perror("put: close 2: \n");
+    }
+  }
   FILE* fw  = fopen(tree->disk1, "w");
   if(complete_data == NULL){
-    commonFree(&complete_data);
     complete_data = tree->block;
   }
   if(num_elements <= 0){
@@ -324,7 +340,10 @@ tree (lsm*): pointer to an lsm tree.
   if(fclose(fw)){
     perror("put: close 2: \n");
   }
-  commonFree(&complete_data);
+  if (complete_data != tree->block) {
+    commonFree(&complete_data);
+  }
+  commonPersist(tree, sizeof(lsm));
   return 0;
 }
 
@@ -344,7 +363,9 @@ val (const valType*): value to place in node.
   n.key = *key;
   n.val = *val;
   tree->block[tree->next_empty] = n;
+  commonPersist(&tree->block[tree->next_empty], sizeof(node));
   tree->next_empty += 1;
+  commonPersist(tree, sizeof(lsm));
   return r;
 }
 
@@ -362,6 +383,8 @@ tree (lsm*): lsm object to delete it from.
   if(ni != NULL){
     tree->next_empty -= 1;
     memmove(&tree->block[ni->index], &tree->block[ni->index+1], tree->block_size-ni->index);
+    commonPersist(&tree->block[ni->index], tree->block_size-ni->index);
+    commonPersist(tree, sizeof(lsm));
   } else {
     // if the node is on disk
     ni = search_disk(key, tree);
@@ -427,6 +450,7 @@ tree (lsm*): pointer to lsm object to make update in.
     n.key = *key;
     n.val = *val;
     tree->block[ni->index] = n;
+    commonPersist(&tree->block[ni->index], sizeof(node));
     //printf("to key: %d  val: %d \n", (*key, *val));
   } else {
     delete(key, tree);

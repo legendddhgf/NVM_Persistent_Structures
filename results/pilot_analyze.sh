@@ -14,7 +14,7 @@ result_type=(
   'Get() Time [ms]'
   'Memory Usage [kB]'
 )
-echo "Results for $1:"
+echo "Results for $(basename $1):"
 echo
 let result_len_one_less=${#result_type[@]}-1
 for i in $(seq 0 $result_len_one_less)

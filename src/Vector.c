@@ -31,7 +31,6 @@ void VectorDoubleCapacity(Vector *v, uintptr_t oldCap) {
   }
   commonPersist(newArr, (newCap + 1) * sizeof(Generic));
   *v = (Vector) newArr; // one pointer move to persistently update the vector
-  commonPersist(v, 1);
   commonFree(&oldArr);
 }
 
@@ -50,7 +49,6 @@ void VectorInit(Vector *v) {
   // persist end marker as well
   commonPersist(arr, sizeof(Generic) * (VECTORINITCAP + 1));
   *v = (Vector) arr; // point of persistence
-  commonPersist(v, sizeof(Vector));
 }
 
 void VectorDestroy(Vector *v) {
@@ -59,7 +57,6 @@ void VectorDestroy(Vector *v) {
   }
   commonFree(v); // &*v
   *v = NULL;
-  commonPersist(v, sizeof(Vector));
 }
 
 // Inserts data into index (range 0 to n-1) of the vector
@@ -117,6 +114,16 @@ uintptr_t VectorGetSize(Vector *v) {
     if (arr[i] != VECTORINITVAL) sizeCount++; // only if not VECTORINITVAL
   }
   return sizeCount;
+}
+
+uintptr_t VectorGetMemSize(Vector *v) {
+  if (v == NULL) {
+    fprintf(stderr, "Passed NULL vector reference to VectorGetMemSize\n");
+    exit(-1);
+  }
+  // capacity plus 1 (index holding the capacity) times size of each index
+  GenericArray arr = (GenericArray) *v;
+  return ((uintptr_t) arr[0] + 1) * sizeof(Generic);
 }
 
 void VectorPrint(FILE *out, Vector *v) {

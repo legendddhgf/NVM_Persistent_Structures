@@ -41,6 +41,10 @@ void pmemInit() {
 // example: pmemMalloc(&node, sizeof(SLLNode), SLLNode_TYPE)
 // where node is SLLNode *
 void pmemMalloc(void **POBJ, size_t SIZE, uintptr_t TYPE_NUM) { \
+  if (SIZE == 0) {
+    *POBJ = NULL;
+    return;
+  }
   PMEMoid OID;
   int ret = pmemobj_zalloc(pop, &OID, SIZE, TYPE_NUM);
   if (ret == -1) {
@@ -55,6 +59,10 @@ void pmemMalloc(void **POBJ, size_t SIZE, uintptr_t TYPE_NUM) { \
 // then sets *POBJ = NULL
 // example: pmemFree(&node) where node is SLLNode *
 void pmemFree(void **POBJ) {
+  // some people enjoy this kind of madness
+  if (POBJ == NULL || *POBJ == NULL) {
+    return;
+  }
   PMEMoid OID = pmemobj_oid(*POBJ);
   if (OID_IS_NULL(OID)) {
     fprintf(stderr, "Invalid object pointer provided to pmemFree\n");

@@ -1,0 +1,35 @@
+Results for SLLBasicResults.csv:
+
+Analyzing Insert() Time [ms]
+1:[2018-01-05 03:47:36] <info> Preset mode activated: quick
+2:[2018-01-05 03:47:36] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 100
+mean 0.891480
+optimal_subsession_size 1
+CI 0.182885
+variance 0.212382
+subsession_autocorrelation_coefficient 0.027678
+
+Analyzing Get() Time [ms]
+1:[2018-01-05 03:47:36] <info> Preset mode activated: quick
+2:[2018-01-05 03:47:36] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 100
+mean 39.465420
+optimal_subsession_size 1
+CI 0.670002
+variance 2.850455
+subsession_autocorrelation_coefficient -0.153904
+
+Analyzing Memory Usage [kB]
+1:[2018-01-05 03:47:36] <info> Preset mode activated: quick
+2:[2018-01-05 03:47:36] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 100
+mean 64.000000
+139:[2018-01-05 03:47:36] <fatal> Autocorrelation coefficient (AC) limit (0.8) cannot be met. This means
+that your data has high autocorrelation and is unlikely i.i.d. See
+https://docs.ascar.io/features/autocorrelation-detection-and-mitigation.html for a
+detailed explanation. You should check the source of the data and try to reduce the
+autocorrelation among samples. You can also set a higher AC limit (using --ac) to
+bypass this limit.
+
+

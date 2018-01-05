@@ -28,7 +28,6 @@ void SLLDestroy(SLL *sll) {
   SLLDestroy(&root->next);
   commonFree(&root);
   *sll = NULL;
-  commonPersist(sll, sizeof(SLL));
 }
 
 // provide the address of the SLL of the main program.
@@ -52,7 +51,6 @@ void SLLInsert(SLL *sll, Generic data, int64_t index) {
     sllHead = newSLLNode(data, NULL); //overwrite head of original list
     commonPersist(sllHead, sizeof(SLLNode));
     *sll = sllHead;
-    commonPersist(sll, sizeof(SLL)); // point of persistence
     return;
   }
   // insert into non-empty list
@@ -70,7 +68,6 @@ void SLLInsert(SLL *sll, Generic data, int64_t index) {
     sllHead = newSLLNode(data, sllHead); //make next be old head/overwrite orig head
     commonPersist(sllHead, sizeof(SLLNode));
     *sll = sllHead;
-    commonPersist(sll, sizeof(SLL)); // point of persistence
   } else if (indexCount == index || index == -1) {
     SLLNode *sllNode = newSLLNode(data, iter->next); // place directly after iter
     commonPersist(sllNode, sizeof(SLLNode));
@@ -102,6 +99,19 @@ Generic SLLGetElement(SLL *sll, int64_t index) {
   }
   fprintf(stderr, "Invalid index passed to SLLGet\n");
   exit(-1);
+}
+
+uintptr_t SLLGetMemSize(SLL *sll) {
+  if (sll == NULL) {
+    fprintf(stderr, "Null SLL reference passed to SLLGetMemSize\n");
+    exit(-1);
+  }
+  uintptr_t memSize = 0;
+  // size of all nodes
+  for (SLLNode *iter = *sll; iter != NULL; iter = iter->next) {
+    memSize += sizeof(SLLNode);
+  }
+  return memSize;
 }
 
 void SLLPrint(FILE *out, SLL *sll) {

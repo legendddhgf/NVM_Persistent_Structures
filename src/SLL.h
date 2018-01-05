@@ -29,7 +29,7 @@ Generic SLLGetElement(SLL *sll, int64_t index);
 uint64_t SLLGetSize(SLL *sll);
 
 // actual memory size
-uint64_t SLLGetMemSize(SLL *sll);
+uintptr_t SLLGetMemSize(SLL *sll);
 
 void SLLPrint(FILE *out, SLL *sll);
 
