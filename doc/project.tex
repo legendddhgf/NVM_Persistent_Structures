@@ -97,18 +97,18 @@ The indexing scheme in all parts of this report starts at 0
 
 \section{Introduction}
 
-Non-volatile memory (NVM) systems research has become a major focus. NVM
-provides the possibility of byte-addressable memory that persists across power
-cycles while maintaining latencies similar to that of DRAM. Although NVM
-technologies have yet to reach their intended potential, there are a number of
-topics of theoretical research that can be done so that NVM can be fully
-utilized once it is more accessible. For example, with volatile memory, any
-corruption or bugs present in memory can be cleared with a power cycle but with
-NVM this is no longer an option. Thus, one requirement of structuring data in
-NVM is the use of persistent data structures, or data structures whose state
-cannot be invalidated. However, there are many data structures to choose from
-and the potential for new ones to be created with particular design focus (i.e.
-batch read optimized).
+Non-volatile memory (NVM) systems research has become a major research focus in
+Computer Science. NVM provides the possibility of byte-addressable memory that
+persists across power cycles while maintaining latencies similar to that of
+DRAM. Although NVM technologies have yet to reach their intended potential,
+there are a number of topics of theoretical research that can be done so that
+NVM can be fully utilized once it is more accessible. For example, with volatile
+memory, any corruption or bugs present in memory can be cleared with a power
+cycle but with NVM this is no longer an option. Thus, one requirement of
+structuring data in NVM is the use of persistent data structures, or data
+structures whose state cannot be invalidated. However, there are many data
+structures to choose from and the potential for new ones to be created with
+particular design focus (i.e. batch read optimized).
 
 This paper will compare four different persistent data structures in various
 scenarios. First some background on major non-volatile memory system research
@@ -133,6 +133,11 @@ However, they come with a number of concerns.
 \todo[inline]{mention shadow updates (I believe mnemosyne did a good job of
 describing these).}
 
+\subsection{Analysis of Data}
+
+Results from any test should be accurate, precise, and reproducible.
+\todo[inline]{Need to discuss slightly more in depth and cite pilot here.}
+
 \section{Methodology}
 
 \todo[inline]{dunno if I will keep this section. I think if I do, it will
@@ -148,14 +153,13 @@ Generic datatype into a struct containing a key and value}
 
 \todo[inline]{this is what I plan to do}
 
-I used cachegrind (or perhaps just used timers of some sort?) to collect data
-and used the Intel's guide on emulating persistent memory with ordinary DRAM to
-emulate persistent memory performance, functionality, and primarily timings.
-(tutorial can be found here
+I use gettimeofday() to collect data on runtime and a series of sizeof() calls
+to determine memory usage.  I used Intel's guide on emulating persistent memory
+with ordinary DRAM to emulate persistent memory performance, functionality, and
+primarily timings. (tutorial can be found here
 \url{https://software.intel.com/en-us/articles/how-to-emulate-persistent-memory-on-an-intel-architecture-server/})
 
-The memory range used to be mapped as pmem was 1G to 3G
-
+The memory range used to be mapped as pmem was 1G to 3G on my laptop.
 
 I focused on making things persistent (invalid state not possible). I also
 used clwb
@@ -171,14 +175,26 @@ which can be downloaded and installed with the entire PMDK intel library here:
 I further used pilot to aid in analysis of the results and structuring the
 benchmark.
 
-Finally, note that functions listed in each data structure's documentation later
-in this section are only those that I have standardized and required for each as
-a critical operation used by the benchmark to generate results. Note that these
+Some functions listed in each data structure's documentation later in this
+section are only those that I have standardized and required for each as a
+critical operation used by the benchmark to generate results. Note that these
 functions may have different uses or ignore some of their parameters: this is
 also normal as data structures may differ in the information needed up front
-during different operations (i.e: indices in BTrees)
+during different operations (i.e: indices in BTrees).
+
+Finally, note that some of these functions are unimplemented or untested but
+described for the sake of future work. Such functions will warn of this within
+the first section or so.
+
+\subsection{Main}
+
+Calls Benchmark. Originally, was intended to be used to work with libpilot and
+still be able to natively call C code. The use of pilot in this project is
+described in (reference\_to\_section).
 
 \subsection{Benchmark}
+
+This is the main program. It is called from Main which is a C++ program.
 
 \subsection{Singly Linked List}
 
@@ -233,20 +249,33 @@ already proven to be persistent, update is also persistent. The runtime of
 update is bounded above by Insert's runtime and hence has the same asymptotic
 worst case runtime as that of Insert.
 
-\subsection{Delete}
+\subsubsection{Delete}
 
-Delete an entry
+This function was not implemented. Delete an entry.
 
-\subsection{Destroy}
+\subsubsection{Destroy}
 
 Destroy the list
 TODO: make the destroy functions persistent by taking the NULL overwrite and
 putting it at the very beginning instead of the end
 
+\subsubsection{GetElement}
+
+This function iterates over the list and returns the item at the provided index
+in unsorted mode. Sorted mode wasn't implemented but would have returned the
+element for a key or NULL if the key wasn't found.
+
+\subsubsection{GetMemSize}
+
+Adds sizeof(SLLNode) for every single node while iterating.
+
 \subsection{Vector}
 
-The vector maintains a contiguous block of memory which doubles in size as
-necessary.
+The vector maintains a pointer to a contiguous block of memory which doubles in
+size as necessary. The vector uses an extra entry which also contains the
+current capacity of the vector. This is so insertion locations can be determined
+instantly or at the very least, one can determine the number of times the vector
+should double in advance.
 
 \subsubsection{Init}
 
@@ -264,10 +293,10 @@ this function is also persistent. This function runs in worst case O(n) time
 since copying a block to another block requires iterating for the size of the
 block.
 
-\dots
-
-the sorted insert may require shifting of some portion of the contiguous block
-of memory.
+The sorted insert was not implemented. Sorted insert requires shifting of all
+data to the right of the insertion location within the vector. To make this
+persistent would be even slower since it would require a full copy into a new
+vector and a final change of the vector block pointer.
 
 \subsubsection{Update}
 
@@ -275,12 +304,70 @@ This is equivalent to unsorted insert.
 
 \subsubsection{Delete}
 
+This function wasn't implemented. Delete would simply set an entry to
+uninitialized value. If the entry (or index) is out of the range of the current
+capacity then nothing happens. Unlike insert which may double the size of the
+block, this function leaves the block as is.
+
 \subsubsection{Destroy}
+
+This free the memory associated with the block and sets the block pointer to
+point to NULL.
+
+\subsubsection{GetElement}
+
+Returns NULL if request is out of capacity boundary or unset and returns the
+item otherwise.
+
+\subsubsection{GetMemSize}
+
+sizeof(entry) * (capacity + 1)
+
+\subsection{LSM Tree}
+
+The LSM tree was provided by harvard PhD (NAME\_HERE). The repository can be
+found here (LINK). The LSM Tree inserts up to a certain prespecified number of
+items into memory and then into disk once memory goes over capacity. Finally
+note that this data structure hasn't been modified to be perfectly persistent.
+in other words, even with persist calls, there are instances where multiple
+pieces of persisted data may not be consistent with each other.
+
+\subsubsection{Init}
+
+This calls the LSM tree init function which does basic initialization and
+allocation of various data blocks.
+
+\subsubsection{Insert}
+
+If there is space in the memory buffer, insertion occurs there. Otherwise, a
+merge is performed between curent disk and buffer content and writes are done to
+the disk accordingly.
+
+\subsubsection{Delete}
+
+This function wasn't used and isn't tested.
+
+\subsubsection{GetElement}
+
+First checks the memory buffer for the data and then the disk. Worst case will
+return NULL
+
+\subsubsection{GetMemSize}
+
+Returns the size of the memory buffer block which is sizeof(LSMNode) *
+memory\_buffer\_size.
 
 \subsection{BTree}
 
 Like the list implementation, the BTree is defined to be a pointer to a node and
-is NULL when empty.
+is NULL when empty. The BTree operates on the rule that given an order, it has
+$[order, 2 * order]$ keys and $[order + 1, 2 * order + 1]$ children per node.
+The keys should be thought of as separators in the sense that values between the
+keys are contained in the children between key locations. Finally, the above
+rule about minimum keys doesn't apply to the root and the above rule about
+minimum children doesn't apply to leaves. Also note this is the only data
+structure that has no unsorted mode because of the nature of how it is
+constructed.
 
 \subsubsection{Init}
 
@@ -289,18 +376,51 @@ guaranteed persistence and runtime as the list's Init function.
 
 \subsubsection{Insert}
 
+The BTree's insert attempts to insert a key into a leaf node. To determine the
+leaf node in question, the correct child node is iterated, based off key range.
+If the leaf node is full, a complicated series of operations ensue to split
+nodes from the leaf potentially all the way up to the root. These split
+operations create a new node and splits left and right sides of the old node
+such that each has the minimum number of keys/children and the parent recieves
+the median. The set of entries considered for the aforementioned split includes
+the insertion entry. The functions are all carefully designed to ensure that the
+data structure is persistent.
+
 \subsubsection{Update}
 
-Only needs to replace data in a node. As a result, we only need to copy the
-node, modify the value for the key in the copy and then have the node's parent
-(or the head if this is the root) change pointers to reflect the updated node.
-If the data doesn't yet exist, an insert is performed instead.
+This function was not implemented. Only needs to replace data in a node. As a
+result, we only need to copy the node, modify the value for the key in the copy
+and then have the node's parent (or the head if this is the root) change
+pointers to reflect the updated node. If the data doesn't yet exist, an insert
+is performed instead.
 
 \subsubsection{Delete}
 
+This function was not implemented. a k/v entry based off the key argument is
+removed. If the entry is in a non-leaf node, then you may have to perform a
+recursive merge on the tree to maintain basic properties.
+
 \subsubsection{Destroy}
 
+Recusrively iterates to every node and every node destroys (frees) itself at the
+end of its own recursive call.
+
+\subsubsection{GetElement}
+
+If a key isn't found, determines which child to search based of key range.
+Returns value if key is found and NULL otherwise.
+
+\subsubsection{GetMemSize}
+
+Recursively get the number of nodes and multiplies by sizeof(BTNode).
+
 \section{Results}
+
+Used my laptop... to get some basic results.
+
+Tried a friend's custom intel build...difficulty with emulation of pmem
+
+Will try my desktop when I get home.
 
 \section{Conclusion}
 
