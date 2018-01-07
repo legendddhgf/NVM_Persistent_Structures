@@ -315,6 +315,10 @@ tree (lsm*): pointer to an lsm tree.
     }
   }
   FILE* fw  = fopen(tree->disk1, "w");
+  if (fw == NULL){
+    perror(tree->disk1);
+    exit(-1);
+  }
   if(complete_data == NULL){
     complete_data = tree->block;
   }

@@ -26,7 +26,9 @@ COMPILECPPFLAGS = -g --std=c++11 -Wall -Werror -Wextra -Wpedantic
 LINKC = gcc -o
 LINKCFLAGS = -lpmemobj
 LINKCPP = g++ -o
-LINKCPPFLAGS = $(LINKCFLAGS) -lpilot
+LINKPILOT= -lpilot
+#LINKCPPFLAGS = $(LINKCFLAGS) $(LINKPILOT)
+LINKCPPFLAGS = $(LINKCFLAGS)
 REMOVE = rm -f
 
 # non-persistent tests
@@ -40,12 +42,12 @@ pexe: $(OBJCPP) OBJCPERSIST
 run-all: clean run clean prun
 
 run: $(EXE)
-	./$(EXE)
-	./get_results.sh
+	sudo ./$(EXE)
+	sudo ./get_results.sh
 
 prun: pexe
 	sudo ./$(EXE)
-	./get_results.sh
+	sudo ./get_results.sh
 
 check: $(EXE)
 	valgrind --leak-check=full --show-leak-kinds=all -v ./$(EXE)
@@ -65,4 +67,4 @@ clean:
 spotless: clean
 	$(REMOVE) $(EXE)
 
-.PHONY: clean spotless run prun run-all check OBJCPERSIST
+.PHONY: clean spotless
