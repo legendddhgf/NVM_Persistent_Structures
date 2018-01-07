@@ -1,0 +1,32 @@
+Results for VectorBasicResults.csv:
+
+Analyzing Insert() Time [ms]
+1:[2018-01-07 00:44:19] <info> Preset mode activated: quick
+2:[2018-01-07 00:44:19] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.012922
+optimal_subsession_size 1
+CI 0.000195
+variance 0.000025
+subsession_autocorrelation_coefficient 0.282426
+
+Analyzing Get() Time [ms]
+1:[2018-01-07 00:44:20] <info> Preset mode activated: quick
+2:[2018-01-07 00:44:20] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.002019
+optimal_subsession_size 1
+CI 0.000069
+variance 0.000003
+subsession_autocorrelation_coefficient 0.017430
+
+Analyzing Memory Usage [kB]
+1:[2018-01-07 00:44:20] <info> Preset mode activated: quick
+2:[2018-01-07 00:44:20] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.520000
+optimal_subsession_size 1667
+CI 0.000000
+variance 0.000000
+subsession_autocorrelation_coefficient 0.800000
+

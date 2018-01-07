@@ -1,0 +1,32 @@
+Results for PMEMLSMBasicResults.csv:
+
+Analyzing Insert() Time [ms]
+1:[2018-01-07 00:45:10] <info> Preset mode activated: quick
+2:[2018-01-07 00:45:10] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.132754
+optimal_subsession_size 1
+CI 0.000463
+variance 0.000139
+subsession_autocorrelation_coefficient 0.119883
+
+Analyzing Get() Time [ms]
+1:[2018-01-07 00:45:10] <info> Preset mode activated: quick
+2:[2018-01-07 00:45:10] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.614099
+optimal_subsession_size 1
+CI 0.001356
+variance 0.001197
+subsession_autocorrelation_coefficient 0.504957
+
+Analyzing Memory Usage [kB]
+1:[2018-01-07 00:45:10] <info> Preset mode activated: quick
+2:[2018-01-07 00:45:10] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 4.144000
+optimal_subsession_size 1667
+CI 0.000000
+variance 0.000000
+subsession_autocorrelation_coefficient 0.800000
+

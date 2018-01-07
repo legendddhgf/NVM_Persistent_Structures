@@ -81,7 +81,7 @@ Applications}
 With the introduction of byte-addressable persistent memory comes the need to
 rethink the way that data in memory is interfaced and structured. At the heart
 of this research is the consideration of various persistent data structures.
-This paper seeks to determine the benefits and trade-offs of five different
+This paper seeks to determine the benefits and trade-offs of four different
 persistent data structures and suggest scenarios in which each one is best
 utilized.
 
@@ -195,7 +195,9 @@ described in (reference\_to\_section).
 
 \subsection{Benchmark}
 
-This is the main program. It is called from Main which is a C++ program.
+This is the main program. It is called from Main which is a C++ program. The
+benchmark facilitates the black box tests on the data structures. These tests
+are timed and are the results sent to a file for each test.
 
 \subsection{Singly Linked List}
 
@@ -421,7 +423,37 @@ Used my laptop... to get some basic results.
 
 Tried a friend's custom intel build...difficulty with emulation of pmem
 
-Will try my desktop when I get home.
+Got some results, will get even more with different values.
+
+Unfortunately, there isn't enough variety of tests to come to much of a
+conclusion but the differences can be summed to the following. Note that
+currently there exists only a sequential insertion of numbers in a particular
+range followed by a sequential set of calls to verify that all elements can
+still be found inside the respective data structures.
+
+\section{Major Challenges}
+
+\subsection{Utilizing persistent memory with a familiar format}
+
+Being able to allocate, free, and request persistence of data in a familiar
+format is extremely important for code portability. However, the Persistent
+Memory Development Kit (PMDK) has a lot of features and requirements than those
+usually needed by malloc/free. As a result, I came up with a wrapper that would
+allow you to call allocation or free in the same way and the actual operation
+can be changed through a different define. This enabled the easy running and
+comparison of data structures in persistent and normal memory modes.
+
+\subsection{Configuration}
+
+Very careful consideration has to be made to ensure that everything is
+configured correctly. For example, pmem test results are so much slower if you
+don't correctly emulate persistent memory and mount onto the location used for
+the persistent memory pool. A major issue that I had been runnning into is the
+kernel code utilizing blocks between those that you specify as NVRAM. Such
+blocks will not have a device in /dev created and as such will have no use. One
+way that I found gave a good chance of recieving a functioning memory segment
+was to split a large segment into multiple small ones so that hopefully at
+least one will be available after you reboot the new grub configuration.
 
 \section{Conclusion}
 
@@ -436,6 +468,5 @@ BTrees:\\
 
 figuring out the mix of C and C++:\\
 \url{https://isocpp.org/wiki/faq/mixing-c-and-cpp}
-
 
 \end{document}
