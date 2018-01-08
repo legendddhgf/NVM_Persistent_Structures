@@ -475,7 +475,8 @@ my laptop and desktop for which the specifications follow.
 The laptop used a persistent memory block that was 2GiB in size and the desktop
 used a block that was 4GiB in size. In either case, the memory pool size was
 800MB which was sufficient for tests up to 4000 inserts on all data structures
-on both volatile and pmem test cases.
+on both volatile and pmem test cases. This was done on a Ubuntu vm in both
+cases.
 
 Currently the only tests are a sequential insertion of numbers in ranges
 ([1,40], [1, 400], [1, 4000]) followed by a sequential set of calls to verify
@@ -501,7 +502,38 @@ Finally, I used pilot to aid in analysis of the results.
 
 \subsection{Results}
 
-\todo[inline]{Graphs here please}
+These graphs were generated using matplotlib. All the results were simply taken
+from the repository just for reference. L/D refers to laptop and desktop
+respectively where the number next to them refers to the number of inserts, the
+number of gets after calling x inserts, and the memory size after calling x
+inserts respectively.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{insertion_times}
+  \caption{The insertion times for laptop and desktop with varying insertion
+  ranges. The singly linked list does really well here because all inserts are
+to the head and hence constant time. Also, for some reason insertions end up
+taking longer on my desktop.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{get_times}
+  \caption{The get times for laptop and desktop with varying insertion
+  ranges. Notice in particular that this is where the BTree shines although with
+only sequential tests it's not easy to see how much so. Performance between
+laptop and desktop are reversed here compared to inserts where laptop
+performance was better.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{memory_usage}
+  \caption{The dynamic memory usage is the same on both machines as expected.
+  Note that the dynamic memory usage for the LSM tree will always be the memory
+buffer size which doesn't change.}
+\end{figure}
 
 \section{Major Challenges}
 
@@ -583,6 +615,12 @@ structure their data.
 
 Thank you to Ethan Miller, Daniel Bittman, and Devashish Purandere for helping
 to provide ideas and helping me narrow the focus of the project appropriately.
+
+\section{Source Code}
+
+You can take a look at all of the source files related to the project in this
+\href{https://bitbucket.org/ssrc/nvm_persistent_structures}{repository}. Note
+that repository ownership is already under SSRC.
 
 \bibliographystyle{abbrv}
 \bibliography{project,bib/csrg}
