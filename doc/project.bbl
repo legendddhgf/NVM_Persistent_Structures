@@ -1,0 +1,37 @@
+\begin{thebibliography}{1}
+
+\bibitem{burr:ibmjrd08}
+G.~W. Burr, B.~N. Kurdi, J.~C. Scott, C.~H. Lam, K.~Gopalakrishnan, and R.~S.
+  Shenoy.
+\newblock Overview of candidate device technologies for storage-class memory.
+\newblock {\em IBM Journal of Research and Development}, 52(4/5):449--464, July
+  2008.
+
+\bibitem{comer:computingsurveys79}
+D.~Comer.
+\newblock The ubiquitous {B-tree}.
+\newblock {\em ACM Computing Surveys}, 11(2):121--137, June 1979.
+
+\bibitem{mixingc/c++}
+{isocpp.org}.
+\newblock mixing-c-and-cpp.
+\newblock \url{https://isocpp.org/wiki/faq/mixing-c-and-cpp}.
+
+\bibitem{li:pilot}
+Y.~Li, Y.~Gupta, E.~L. Miller, and D.~D.~E. Long.
+\newblock The {Pilot} open source benchmark framework.
+\newblock \url{https://ascar.io/pilot/}, 2016.
+
+\bibitem{oneil:actainformatica96}
+P.~O'Neil, E.~Cheng, D.~Gawlick, and E.~O'Neil.
+\newblock The log-structured merge-tree ({LSM}-tree).
+\newblock {\em Acta Informatica}, 33:351--385, 1996.
+
+\bibitem{volos:asplos11}
+H.~Volos, A.~{Jaan Tack}, and M.~M. Swift.
+\newblock {Mnemosyne}: Lightweight persistent memory.
+\newblock In {\em Proceedings of the 16th International Conference on
+  Architectural Support for Programming Languages and Operating Systems (ASPLOS
+  2011)}, Mar. 2011.
+
+\end{thebibliography}
