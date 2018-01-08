@@ -6,11 +6,11 @@ extern "C" {
 #endif
 
 #ifndef NUMTRIALS
-#define NUMTRIALS (10000) /* number of times to repeat test for numbers */
+#define NUMTRIALS (1000) /* number of times to repeat test for numbers */
 #endif
 
 #ifndef TESTRANGE
-#define TESTRANGE (40) /* range of operation in tests*/
+#define TESTRANGE (400) /* range of operation in tests*/
 #endif
 
 #define LISTHEADINSERT (0)

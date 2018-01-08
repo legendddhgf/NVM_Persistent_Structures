@@ -1,0 +1,32 @@
+Results for PMEMBTreeBasicResults.csv:
+
+Analyzing Insert() Time [ms]
+1:[2018-01-08 00:04:41] <info> Preset mode activated: quick
+2:[2018-01-08 00:04:41] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.806661
+optimal_subsession_size 1
+CI 0.011494
+variance 0.085963
+subsession_autocorrelation_coefficient 0.046048
+
+Analyzing Get() Time [ms]
+1:[2018-01-08 00:04:41] <info> Preset mode activated: quick
+2:[2018-01-08 00:04:41] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.008748
+optimal_subsession_size 1
+CI 0.002050
+variance 0.002733
+subsession_autocorrelation_coefficient 0.005084
+
+Analyzing Memory Usage [kB]
+1:[2018-01-08 00:04:41] <info> Preset mode activated: quick
+2:[2018-01-08 00:04:41] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.912000
+optimal_subsession_size 1667
+CI 0.000000
+variance 0.000000
+subsession_autocorrelation_coefficient 0.800000
+

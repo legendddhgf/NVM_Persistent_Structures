@@ -1,0 +1,32 @@
+Results for SLLBasicResults.csv:
+
+Analyzing Insert() Time [ms]
+1:[2018-01-08 00:04:25] <info> Preset mode activated: quick
+2:[2018-01-08 00:04:25] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.008260
+optimal_subsession_size 1
+CI 0.002560
+variance 0.004263
+subsession_autocorrelation_coefficient 0.007497
+
+Analyzing Get() Time [ms]
+1:[2018-01-08 00:04:25] <info> Preset mode activated: quick
+2:[2018-01-08 00:04:25] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.007608
+optimal_subsession_size 1
+CI 0.003992
+variance 0.010370
+subsession_autocorrelation_coefficient 0.002936
+
+Analyzing Memory Usage [kB]
+1:[2018-01-08 00:04:25] <info> Preset mode activated: quick
+2:[2018-01-08 00:04:25] <info> Setting the limit of autocorrelation coefficient to 0.8
+sample_size 10000
+mean 0.640000
+optimal_subsession_size 1667
+CI 0.000000
+variance 0.000000
+subsession_autocorrelation_coefficient 0.800000
+
