@@ -4,6 +4,7 @@ TEXSRC = $(MAIN).tex
 TEXOBJ = *.aux *.log *.toc *.out *.fdb_latexmk *.fls
 COMPILETEX = latexmk -pdf
 PDFREADER = evince
+SPELLCHECK = aspell -t -c
 
 DELETE = rm -f
 
@@ -11,7 +12,7 @@ run: $(TEXPDF)
 	$(PDFREADER) $<
 
 $(TEXPDF): $(TEXSRC)
-	$(COMPILETEX) $^
+	$(SPELLCHECK) $(TEXSRC) && $(COMPILETEX) $^
 
 clean:
 	$(DELETE) $(TEXOBJ)

@@ -25,9 +25,9 @@ void SLLDestroy(SLL *sll) {
     return;
   }
   SLLNode *root = *sll;
+  *sll = NULL;
   SLLDestroy(&root->next);
   commonFree(&root);
-  *sll = NULL;
 }
 
 // provide the address of the SLL of the main program.

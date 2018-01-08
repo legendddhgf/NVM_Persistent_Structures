@@ -55,8 +55,9 @@ void VectorDestroy(Vector *v) {
   if (v == NULL || *v == NULL) {
     return;
   }
-  commonFree(v); // &*v
+  GenericArray arr = *v;
   *v = NULL;
+  commonFree(arr); // &*v
 }
 
 // Inserts data into index (range 0 to n-1) of the vector
